@@ -30,17 +30,25 @@ export const registerUser = (async (req, res) => {
 
     const token = jwt.sign({
         id: user._id,
-
     }, config.JWT_SECRET, { expiresIn: "1h" });
-
-  
 
     res.status(201).json({
         message: "User registered successfully",
         user: {
             username: user.username,
-            email: user.email
+            email: user.email,
         },
+        token: token
+    })
+})
 
+export const Login = (async (req, res) => {
+    const { username, email, password } = req.body;
+
+    const user = await Usermodel.findOne({
+        $or: [
+            { username },
+            { email }
+        ]
     })
 })

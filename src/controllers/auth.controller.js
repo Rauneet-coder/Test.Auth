@@ -9,12 +9,14 @@ export const registerUser = (async (req, res) => {
 
     const isAlreadyExists = await Usermodel.findOne({
         $or: [
-            username,
-            email
+            { username },
+            { email }
         ]
     });
 
-    res.status(409).json({ message: "User already exists" });
+    if (isAlreadyExists) {
+        return res.status(409).json({ message: "User already exists" });
+    }
 
     // const hashedPass = await crypto.createHash("sha256").update(password).digest("hex") Not used Crypto for hashing password 
     // as it is not recommended for password hashing. Instead, we can use bcrypt library for hashing password. 

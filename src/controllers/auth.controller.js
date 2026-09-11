@@ -124,28 +124,33 @@ export const refreshToken = (async (req, res) => {
             expiresIn: "7d"
         });
 
+    const newRefreshTokenHash = crypto.createHash("sha256").update(newRefreshToken).digest("hex")
+    session.refreshTokenHash = newRefreshTokenHash;
+    await session.save();
 
-    res.status(201).json({
-        message: "User registered successfully",
-        user: {
-            username: user.username,
-            email: user.email,
-        },
-        newAccessToken
-
+    res.cookie("refreshToken", newRefreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     })
 
+    res.status(200).json({
+        message: "Access token refreshed successfully",
+        accessToken: newAccessToken
+    })
+});
 
-    
-})
+
+
 
 export const Login = (async (req, res) => {
     const { username, email, password } = req.body;
 
     const user = await Usermodel.findOne({
         $or: [
-            username,
-            email
+            { username },
+            { email }
         ]
 
     })

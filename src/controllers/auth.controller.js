@@ -76,7 +76,62 @@ export const getMe = (async (req, res) => {
     })
 })
 
-const Login = (async (req, res) => {
+export const refreshToken = (async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken){
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+    const decoded = jwt.verify(refreshToken, config.JWT_SECRET);
+
+    const newRefreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex")
+    const user = await Usermodel.findById(decoded.id);
+    if (!user){
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    const session = await sessionModel.findOne({
+        refreshTokenHash,
+        revoked: false
+    })
+
+    res.status(200).json({
+        message: "User found",
+        user: {
+            username: user.username,
+            email: user.email
+        }
+    })
+    const newAccessToken = jwt.sign({
+        id: user._id,
+
+    }, config.JWT_SECRET,
+        {
+            expiresIn: "15m"
+        });
+
+    const newRefreshToken = jwt.sign({
+        id: user._id,
+    }, config.JWT_SECRET,
+        {
+            expiresIn: "7d"
+        });
+
+
+    res.status(201).json({
+        message: "User registered successfully",
+        user: {
+            username: user.username,
+            email: user.email,
+        },
+        newAccessToken
+
+    })
+
+
+    
+})
+
+export const Login = (async (req, res) => {
     const { username, email, password } = req.body;
 
     const user = await Usermodel.findOne({

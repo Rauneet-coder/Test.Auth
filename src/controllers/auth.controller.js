@@ -3,6 +3,7 @@ import crypto from "crypto"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
+import sessionModel from "../models/session.model.js";
 
 export const registerUser = (async (req, res) => {
     const { username, email, password } = req.body;

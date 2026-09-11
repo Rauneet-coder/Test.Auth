@@ -44,6 +44,13 @@ export const registerUser = (async (req, res) => {
             expiresIn: "7d"
         });
 
+    // Save session to DB so /refresh-token can validate it later
+    await sessionModel.create({
+        user: user._id,
+        refreshTokenHash: crypto.createHash("sha256").update(refreshToken).digest("hex"),
+        ip: req.ip,
+        userAgent: req.headers["user-agent"]
+    });
 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,

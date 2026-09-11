@@ -95,27 +95,23 @@ export const refreshToken = (async (req, res) => {
     }
     const decoded = jwt.verify(refreshToken, config.JWT_SECRET);
 
-    const newRefreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex")
+    const oldRefreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex")
     const user = await Usermodel.findById(decoded.id);
     if (!user){
         return res.status(404).json({ message: "User not found" });
     }
 
     const session = await sessionModel.findOne({
-        refreshTokenHash,
+        refreshTokenHash: oldRefreshTokenHash,
         revoked: false
     })
 
-    res.status(200).json({
-        message: "User found",
-        user: {
-            username: user.username,
-            email: user.email
-        }
-    })
+    if (!session) {
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
+    }
+
     const newAccessToken = jwt.sign({
         id: user._id,
-
     }, config.JWT_SECRET,
         {
             expiresIn: "15m"

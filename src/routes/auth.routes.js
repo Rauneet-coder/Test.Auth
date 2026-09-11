@@ -11,9 +11,16 @@ const authRouter = Router();
  */
 authRouter.post("/register", authController.registerUser);
 
-
+/**
+ * GET /api/auth/get-me
+ * Response: { message, user: { username, email } }
+ */
 authRouter.get("/get-me", authController.getMe)
 
+/**
+ * POST /api/auth/refresh-token
+ * Response: { message, accessToken }
+ */
 authRouter.get("/refresh-token", authController.refreshToken)
 
 

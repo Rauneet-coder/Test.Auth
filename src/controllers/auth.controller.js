@@ -28,9 +28,21 @@ export const registerUser = (async (req, res) => {
         password: hashedPass
     })
 
-    const token = jwt.sign({
+    const accessToken = jwt.sign({
         id: user._id,
-    }, config.JWT_SECRET, { expiresIn: "1h" });
+
+    }, config.JWT_SECRET,
+        {
+            expiresIn: "15m"
+        });
+
+    const refreshToken = jwt.sign({
+        id: user._id,
+    }, config.JWT_SECRET,
+        {
+            expiresIn: "7d"
+        });
+
 
     res.status(201).json({
         message: "User registered successfully",
@@ -38,17 +50,40 @@ export const registerUser = (async (req, res) => {
             username: user.username,
             email: user.email,
         },
-        token: token
+        accessToken
+
     })
 })
 
-export const Login = (async (req, res) => {
+export const getMe = (async (req, res) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const decodedToken = jwt.verify(token, config.JWT_SECRET);
+    const user = await Usermodel.findById(decodedToken.id);
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+        message: "User found",
+        user: {
+            username: user.username,
+            email: user.email
+        }
+    })
+})
+
+const Login = (async (req, res) => {
     const { username, email, password } = req.body;
 
     const user = await Usermodel.findOne({
         $or: [
-            { username },
-            { email }
+            username,
+            email
         ]
+
     })
 })

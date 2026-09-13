@@ -205,17 +205,59 @@ export const refreshToken = (async (req, res) => {
     })
 });
 
+export const logout = (async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken){
+        return res.status(401).json({ message: "Already logout!" });
+    }
+    const decoded = jwt.verify(refreshToken, config.JWT_SECRET);
+    const user = await Usermodel.findById(decoded.id);
+    if (!user){
+        return res.status(404).json({ message: "User not found" });
+    }
 
-
-
-export const Login = (async (req, res) => {
-    const { username, email, password } = req.body;
-
-    const user = await Usermodel.findOne({
-        $or: [
-            { username },
-            { email }
-        ]
-
+    const session = await sessionModel.findOne({
+        refreshTokenHash: crypto.createHash("sha256").update(refreshToken).digest("hex"),
+        revoked: false
     })
+
+    if (!session) {
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
+    }
+
+    session.revoked = true;
+    await session.save();
+
+    res.clearCookie("refreshToken");
+
+    res.status(200).json({ message: "User logged out successfully" });
+
 })
+
+export const logoutAll = (async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+        return res.status(400).json({ message: "Refresh token not found" });
+    }
+
+    try {
+        const decoded = jwt.verify(refreshToken, config.JWT_SECRET)
+
+        await sessionModel.updateMany({
+            user: decoded.id,
+            revoked: false
+        }, {
+            revoked: true
+        })
+    } catch (error) {
+        // Token might be invalid/expired, just proceed to clear cookie
+    }
+
+    res.clearCookie("refreshToken")
+
+    res.status(200).json({
+        message: "Logged out from all devices successfully"
+    })
+
+});

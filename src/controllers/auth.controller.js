@@ -249,7 +249,7 @@ export const logoutAll = (async (req, res) => {
 export async function verifyEmail(req, res) {
     const { otp, email } = req.body
 
-    const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+    const otpHash = crypto.createHash("sha256").update(String(otp)).digest("hex");
 
     const otpDoc = await otpModel.findOne({
         email,
@@ -264,7 +264,7 @@ export async function verifyEmail(req, res) {
 
     const user = await Usermodel.findByIdAndUpdate(otpDoc.user, {
         verified: true
-    })
+    }, { new: true })
 
     await otpModel.deleteMany({
         user: otpDoc.user

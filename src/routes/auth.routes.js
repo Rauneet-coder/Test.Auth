@@ -17,6 +17,8 @@ authRouter.post("/register", authController.registerUser);
  */
 authRouter.get("/get-me", authController.getMe)
 
+authRouter.post("/login", authController.login)
+
 /**
  * POST /api/auth/refresh-token
  * Response: { message, accessToken }
@@ -28,7 +30,7 @@ authRouter.get("/logout", authController.logout)
 
 authRouter.get("/logout-all", authController.logoutAll)
 
-authRouter.post("/verify-email", authController.verifyEmail)
+authRouter.get("/verify-email", authController.verifyEmail)
 
 
 export default authRouter;

@@ -13,6 +13,14 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser())
 
+// Health check endpoint for CI/CD pipeline
+app.get("/health", (_req, res) => {
+    res.status(200).json({
+        status: "ok",
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
 
 app.use("/api/auth", authRouter);
 

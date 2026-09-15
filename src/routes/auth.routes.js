@@ -23,14 +23,14 @@ authRouter.post("/login", authController.login)
  * POST /api/auth/refresh-token
  * Response: { message, accessToken }
  */
-authRouter.get("/refresh-token", authController.refreshToken)
+authRouter.post("/refresh-token", authController.refreshToken)
 
 
-authRouter.get("/logout", authController.logout)
+authRouter.post("/logout", authController.logout)
 
-authRouter.get("/logout-all", authController.logoutAll)
+authRouter.post("/logout-all", authController.logoutAll)
 
-authRouter.get("/verify-email", authController.verifyEmail)
+authRouter.post("/verify-email", authController.verifyEmail)
 
 
 export default authRouter;

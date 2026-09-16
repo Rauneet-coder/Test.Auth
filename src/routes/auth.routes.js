@@ -1,5 +1,7 @@
 import { Router } from "express";
 import * as authController from "../controllers/auth.controller.js";
+import { validate } from "../middlewares/validate.js";
+import { RegisterSchema, LoginSchema, VerifyOtpSchema } from "../Validators/auth.validator.js";
 
 
 
@@ -9,7 +11,7 @@ const authRouter = Router();
  * POST /api/auth/register
  * Body: { username, email, password }
  */
-authRouter.post("/register", authController.registerUser);
+authRouter.post("/register", validate(RegisterSchema), authController.registerUser);
 
 /**
  * GET /api/auth/get-me
@@ -17,7 +19,7 @@ authRouter.post("/register", authController.registerUser);
  */
 authRouter.get("/get-me", authController.getMe)
 
-authRouter.post("/login", authController.login)
+authRouter.post("/login", validate(LoginSchema), authController.login)
 
 /**
  * POST /api/auth/refresh-token
@@ -30,7 +32,7 @@ authRouter.post("/logout", authController.logout)
 
 authRouter.post("/logout-all", authController.logoutAll)
 
-authRouter.post("/verify-email", authController.verifyEmail)
+authRouter.post("/verify-email", validate(VerifyOtpSchema), authController.verifyEmail)
 
 
 export default authRouter;

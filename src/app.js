@@ -26,8 +26,6 @@ app.use("/api/auth", authRouter);
 
 // ─── 404 Catch-All ──────────────────────────────────────────────────────────
 // This middleware runs only when no route above matched the request.
-// Without this, Express returns a plain-text / HTML "Cannot GET /..." page
-// which breaks the JSON API contract and can leak information.
 app.use((_req, res) => {
     res.status(404).json({
         error: "NOT_FOUND",

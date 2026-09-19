@@ -28,7 +28,11 @@ export const LoginSchema = z.object({
 });
 
 // ─── Verify OTP Schema ────────────────────────────────────────────────────────
+// otp must be EXACTLY 6 numeric digits.
+// Using a regex instead of z.string().length(6) because .length(6) would
+// also accept "AABBCC" or "abc123" — any 6-character string passes.
+// The regex /^\d{6}$/ enforces digits only, closing that gap.
 export const VerifyOtpSchema = z.object({
     email: z.string().email("Invalid email address"),
-    otp: z.string().length(6, "OTP must be 6 digits long"),
+    otp: z.string().regex(/^\d{6}$/, "OTP must be exactly 6 numeric digits"),
 });

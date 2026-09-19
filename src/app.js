@@ -35,4 +35,23 @@ app.use((_req, res) => {
     });
 });
 
+// ─── Global Error Handler ────────────────────────────────────────────────────
+// Express identifies an error-handling middleware by its four-argument
+// signature (err, req, res, next). All async errors in Express 5 are
+// automatically forwarded here, so every unhandled rejection results in a
+// structured JSON 500 response instead of crashing the process or leaking
+// an HTML stack trace to the client.
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
+    // Log the full error server-side for debugging.
+    console.error("[ERROR]", err);
+
+    // Never send the raw stack trace to the client in production.
+    const statusCode = err.status ?? err.statusCode ?? 500;
+    res.status(statusCode).json({
+        error: "INTERNAL_SERVER_ERROR",
+        message: "An unexpected error occurred. Please try again later."
+    });
+});
+
 export default app;

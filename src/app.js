@@ -39,7 +39,6 @@ app.use((_req, res) => {
 // automatically forwarded here, so every unhandled rejection results in a
 // structured JSON 500 response instead of crashing the process or leaking
 // an HTML stack trace to the client.
-// eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
     // Log the full error server-side for debugging.
     console.error("[ERROR]", err);

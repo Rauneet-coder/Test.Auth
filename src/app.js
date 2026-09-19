@@ -10,11 +10,6 @@ import cookieParser from "cookie-parser";
 const app = express();
 
 app.use(morgan("dev"));
-// Limit JSON bodies to 10 KB.
-// Express defaults to 100 KB — unnecessarily large for an auth API that
-// only ever receives a few string fields (email, password, otp, username).
-// An oversized body limit allows memory-exhaustion DoS attacks where an
-// attacker sends a huge payload to tie up the JSON parser.
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
 

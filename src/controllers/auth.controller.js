@@ -112,28 +112,16 @@ export const login = (async (req, res) => {
 })
 
 export const getMe = (async (req, res) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-        return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    try {
-        const decodedToken = jwt.verify(token, config.JWT_SECRET);
-        const user = await Usermodel.findById(decodedToken.id);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
+    // req.user is guaranteed to exist here because the authenticate
+    // middleware runs before this handler and already verified the JWT,
+    // looked up the user, and attached them to the request object.
+    res.status(200).json({
+        message: "User found",
+        user: {
+            username: req.user.username,
+            email: req.user.email
         }
-
-        res.status(200).json({
-            message: "User found",
-            user: {
-                username: user.username,
-                email: user.email
-            }
-        })
-    } catch (error) {
-        return res.status(401).json({ message: "Invalid or expired token" });
-    }
+    });
 })
 
 export const refreshToken = (async (req, res) => {

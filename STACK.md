@@ -7,7 +7,7 @@
 > **Keep this file up to date.** Every time a new package is added, a pattern
 > changes, or a design decision is made, update the relevant section here.
 >
-> Last updated: 2026-09-19
+> Last updated: 2026-09-19 (session 2 — input validation & error handling fixes)
 
 ---
 
@@ -568,3 +568,7 @@ The final image contains no build tools, no dev dependencies, and no source file
 | 2026-09-19 | Added global 404 catch-all handler in `app.js` | Unmatched routes previously returned an HTML error page breaking the JSON API contract |
 | 2026-09-19 | Added global 4-argument error handler in `app.js` | Express 5 forwards async rejections here; without this, errors produce HTML or crash the process |
 | 2026-09-19 | Added Zod validation middleware + schemas (previous session) | Input from clients is never trusted; Zod provides typed, declarative validation with clear error messages |
+| 2026-09-19 | **F-06** — Removed password complexity regexes from `LoginSchema` | Complexity rules at login permanently lock out users whose passwords predate the rules; `bcrypt.compare` is the real gate, not Zod |
+| 2026-09-19 | **F-05** — Changed `VerifyOtpSchema.otp` from `z.string().length(6)` to `z.string().regex(/^\d{6}$/)` | `length(6)` accepted any 6-char string including `"AABBCC"`; the regex enforces numeric digits only, matching what `generateOtp()` actually produces |
+| 2026-09-19 | **F-07** — `validate` middleware now returns ALL Zod errors as `{ errors: [{ field, message }] }` | Previously only the first error was returned, forcing clients to retry 3× to discover 3 bad fields |
+| 2026-09-19 | **F-08** — `express.json({ limit: "10kb" })` body size cap added in `app.js` | Default 100 KB limit allows memory-exhaustion DoS; auth requests never legitimately exceed a few hundred bytes |

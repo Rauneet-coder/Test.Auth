@@ -11,7 +11,7 @@ const app = express();
 
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 
 // Health check endpoint for CI/CD pipeline
 app.get("/health", (_req, res) => {
@@ -23,5 +23,16 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+
+// ─── 404 Catch-All ──────────────────────────────────────────────────────────
+// This middleware runs only when no route above matched the request.
+// Without this, Express returns a plain-text / HTML "Cannot GET /..." page
+// which breaks the JSON API contract and can leak information.
+app.use((_req, res) => {
+    res.status(404).json({
+        error: "NOT_FOUND",
+        message: "The requested resource does not exist"
+    });
+});
 
 export default app;

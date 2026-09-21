@@ -1,0 +1,133 @@
+/* ============================================================
+   AITH — OTP Input Component Styles
+   6-box segmented, keyboard-navigable OTP entry
+   ============================================================ */
+
+.otp-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.otp-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.otp-grid {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: center;
+}
+
+.otp-box {
+  width: 52px;
+  height: 60px;
+  background: var(--color-input-bg);
+  border: 1.5px solid var(--color-input-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  text-align: center;
+  letter-spacing: 0;
+  caret-color: var(--color-accent);
+  transition:
+    border-color var(--transition-normal),
+    background var(--transition-normal),
+    box-shadow var(--transition-normal),
+    transform var(--transition-fast);
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.otp-box::-webkit-outer-spin-button,
+.otp-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.otp-box:focus {
+  border-color: var(--color-accent);
+  background: rgba(99, 102, 241, 0.06);
+  box-shadow: 0 0 0 3px var(--color-accent-dim), 0 0 16px var(--color-accent-glow);
+  transform: scale(1.04);
+}
+
+.otp-box.filled {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--color-text-primary);
+}
+
+.otp-box.error {
+  border-color: var(--color-error);
+  background: var(--color-error-dim);
+  animation: shake 0.35s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-4px); }
+  40%       { transform: translateX(4px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(3px); }
+}
+
+/* Separator dot between box 3 and 4 */
+.otp-sep {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* ---------- Resend Row ---------- */
+.otp-resend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.otp-resend-btn {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.otp-resend-btn:disabled {
+  color: var(--color-text-muted);
+  cursor: default;
+  opacity: 0.6;
+}
+
+.otp-resend-btn:not(:disabled):hover {
+  color: var(--color-accent-hover);
+}
+
+.otp-countdown {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+}
+
+/* ---------- Hints ---------- */
+.otp-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  letter-spacing: 0.01em;
+}

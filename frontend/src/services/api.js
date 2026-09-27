@@ -1,55 +1,57 @@
-/**
- * api.js — Axios instance pre-configured for the Aith backend.
- *
- * All auth endpoints live at /api/auth/*. The base URL is read from
- * the Vite env variable VITE_API_URL, falling back to the local dev server.
- *
- * Credentials (cookies) are included so the httpOnly refresh-token cookie
- * is sent automatically on every request.
- */
+import axios from "axios";
 
-import axios from 'axios';
-
+// Keep the access token in memory. The browser manages the HttpOnly refresh cookie.
+let accessToken = null;
+export const setAccessToken = (token) => {
+  accessToken = token;
+};
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
-  withCredentials: true,          // include httpOnly cookies
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: import.meta.env.VITE_API_URL || "",
+  withCredentials: true,
+  headers: { "Content-Type": "application/json" },
   timeout: 15_000,
 });
-
-/* ---------- Request interceptor — attach access token ---------- */
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
   return config;
 });
-
-/* ---------- Response interceptor — surface error messages ---------- */
 api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    const message =
-      err.response?.data?.message ||
-      err.response?.data?.error ||
-      err.message ||
-      'Something went wrong. Please try again.';
-    return Promise.reject(new Error(message));
+  (response) => {
+    if (!response.data || typeof response.data !== "object") {
+      const error = new Error(
+        "Expected a JSON response. Check that the Aith backend is running on port 3000.",
+      );
+      error.response = {
+        status: response.status,
+        data: { message: error.message },
+      };
+      return Promise.reject(error);
+    }
+    return response;
+  },
+  (error) => {
+    if (error.response && typeof error.response.data !== "object") {
+      error.response.data = {
+        message:
+          "Expected a JSON response. Check that the Aith backend is running on port 3000.",
+      };
+    }
+    error.message =
+      error.response?.data?.errors?.map((item) => item.message).join(" ") ||
+      error.response?.data?.message ||
+      (error.response
+        ? `Request failed (${error.response.status}).`
+        : "Could not reach the API. Check that your backend is running on port 3000.");
+    return Promise.reject(error);
   },
 );
-
-/* ---------- Auth endpoints ---------- */
 export const authApi = {
-  register: (payload) => api.post('/api/auth/register', payload),
-  login:    (payload) => api.post('/api/auth/login', payload),
-  verifyEmail: (payload) => api.post('/api/auth/verify-email', payload),
-  refreshToken: () => api.post('/api/auth/refresh-token'),
-  logout:    () => api.post('/api/auth/logout'),
-  logoutAll: () => api.post('/api/auth/logout-all'),
-  getMe:     () => api.get('/api/auth/me'),
+  register: (payload) => api.post("/api/auth/register", payload),
+  login: (payload) => api.post("/api/auth/login", payload),
+  verifyEmail: (payload) => api.post("/api/auth/verify-email", payload),
+  refreshToken: () => api.post("/api/auth/refresh-token"),
+  logout: () => api.post("/api/auth/logout"),
+  logoutAll: () => api.post("/api/auth/logout-all"),
+  getMe: () => api.get("/api/auth/me"),
 };
-
 export default api;

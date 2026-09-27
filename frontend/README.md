@@ -1,16 +1,31 @@
-# React + Vite
+# Aith authentication playground
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A single-page React interface for the existing Express authentication backend.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Start the configured backend on port 3000, then:
 
-## React Compiler
+```sh
+cd frontend
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Open http://localhost:5173. Vite forwards `/api` requests to http://localhost:3000, so no cross-origin setup is needed in development. MongoDB and the backend's email configuration must be working for registration and email verification.
 
-## Expanding the Oxlint configuration
+## Try the flow
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+1. Create an account with a username, email, and password.
+2. Enter the six-digit code delivered by email.
+3. Sign in, then use Get profile, Refresh token, Sign out, or All devices.
+4. Inspect status codes, timings, response JSON, and the five most recent requests. Requests can also be tested while signed out.
+
+Access tokens stay in memory and are hidden in displayed responses. After a page reload, use Refresh token followed by Get profile to restore the session using the backend's HttpOnly cookie. Request activity is cleared on reload. Google and GitHub buttons are disabled placeholders for future OAuth support.
+
+The backend sets Secure, SameSite=Strict refresh cookies. Use localhost for local development, and HTTPS with the API on the same site when deploying. The production web server must forward `/api` to the backend. If using `VITE_API_URL` for a separate API origin, configure the backend's CORS and cookie policy accordingly.
+
+```sh
+npm run build
+npm run lint
+```

@@ -241,7 +241,8 @@ export async function verifyEmail(req, res) {
 
     const otpDoc = await otpModel.findOne({
         email,
-        otpHash
+        otpHash,
+        deletedAt: { $gt: new Date() }
     })
 
     if (!otpDoc) {

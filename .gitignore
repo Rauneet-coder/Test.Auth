@@ -23,3 +23,10 @@ frontend/.env
 frontend/.env.*
 !frontend/.env.example
 frontend/dist/
+
+# ---- Root ----
+.env
+.env.*
+*.env
+node_modules/
+

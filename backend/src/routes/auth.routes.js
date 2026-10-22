@@ -36,5 +36,5 @@ authRouter.post("/logout-all", authController.logoutAll);
 
 authRouter.post("/verify-email", validate(VerifyOtpSchema), authController.verifyEmail);
 
-
+authRouter.get("/health-check", authController.healthcheck);
 export default authRouter;

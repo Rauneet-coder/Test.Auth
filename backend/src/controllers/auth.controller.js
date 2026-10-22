@@ -8,6 +8,11 @@ import { sendEmail } from "../services/email.service.js";
 import { generateOtp, getOtpHtml } from "../utils/utils.js";
 import otpModel from "../models/otp.model.js";
 
+export const healthcheck = (async (req, res) => {
+    res.status(200).json({
+        message: "OK"
+    });
+})  
 
 export const registerUser = (async (req, res) => {
     const { username, email, password } = req.body;
@@ -16,7 +21,7 @@ export const registerUser = (async (req, res) => {
         $or: [
             { username },
             { email }
-        ]
+        ],
     });
 
     if (isAlreadyExists) {
@@ -60,16 +65,16 @@ export const login = (async (req, res) => {
 
     const user = await Usermodel.findOne({email});
     if (!user) {
-        return res.status(401).json({ message: "User not found" });
+        return res.status(400).json({ message: "User not found" });
     }
 
     if(!user.verified){
-        return res.status(401).json({message: "Email not verified"});
+        return res.status(400).json({message: "Email not verified"});
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid password" });
+        return res.status(400).json({ message: "Invalid password" });
     }
     
     const accessToken = jwt.sign({

@@ -1,4 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
+
+// ─── Mock email service before app import ────────────────────────────────────
+vi.mock("../../src/services/email.service.js", () => ({
+    sendEmail: vi.fn().mockResolvedValue(undefined)
+}));
+
 import request from "supertest";
 import bcrypt from "bcrypt";
 import app from "../../src/app.js";
@@ -46,6 +52,9 @@ describe("POST /api/auth/register", () => {
 
     // ─── P0: Register duplicate email/username ────────────────────────────────
     it("should return 409 if email already exists", async () => {
+        // Ensure validUser exists before checking duplicate
+        await request(app).post("/api/auth/register").send(validUser);
+
         const response = await request(app)
             .post("/api/auth/register")
             .send({
@@ -59,6 +68,9 @@ describe("POST /api/auth/register", () => {
     });
 
     it("should return 409 if username already exists", async () => {
+        // Ensure validUser exists before checking duplicate
+        await request(app).post("/api/auth/register").send(validUser);
+
         const response = await request(app)
             .post("/api/auth/register")
             .send({
@@ -130,19 +142,32 @@ describe("POST /api/auth/register", () => {
         });
     });
 
-    // ─── P2: Password hashing ────────────────────────────────────────────────
+    // ─── P2: Password hashing (Self-contained) ───────────────────────────────
     it("should securely hash password with bcrypt and never store plaintext in database", async () => {
-        const savedUser = await Usermodel.findOne({ email: validUser.email });
+        const hashTestUser = {
+            username: "hashtestuser",
+            email: "hash.test@example.com",
+            password: "HashPassword123!"
+        };
+        await Usermodel.deleteOne({ email: hashTestUser.email });
+
+        await request(app)
+            .post("/api/auth/register")
+            .send(hashTestUser);
+
+        const savedUser = await Usermodel.findOne({ email: hashTestUser.email });
         expect(savedUser).toBeDefined();
 
         // 1. Password must NEVER equal the plaintext password
-        expect(savedUser.password).not.toBe(validUser.password);
+        expect(savedUser.password).not.toBe(hashTestUser.password);
 
         // 2. Password must match standard bcrypt hash format ($2a$ or $2b$)
         expect(savedUser.password).toMatch(/^\$2[ab]\$\d{2}\$/);
 
         // 3. bcrypt.compare must verify the raw password against the hash
-        const isMatch = await bcrypt.compare(validUser.password, savedUser.password);
+        const isMatch = await bcrypt.compare(hashTestUser.password, savedUser.password);
         expect(isMatch).toBe(true);
+
+        await Usermodel.deleteOne({ email: hashTestUser.email });
     });
 });

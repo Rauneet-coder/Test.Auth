@@ -91,6 +91,7 @@ describe("POST /api/auth/verify-email", () => {
             });
 
         expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({ message: "Invalid OTP" });
     });
 
     // ─── Positive Test: Correct OTP ──────────────────────────────────────────

@@ -72,3 +72,12 @@
 .response-tool-feedback { font-size: 10px; line-height: 1.5; color: #69815b; margin: 8px 0 0; }
 .response-tool-feedback:empty { display: none; }
 .response-tools + .response-tool-feedback + .response-code-inset { margin-top: 10px; }
+.response-metadata { margin-top: 14px; border-bottom: 1px solid #edf0e8; padding-bottom: 12px; }
+.response-metadata summary { display: flex; width: fit-content; align-items: center; gap: 4px; cursor: pointer; list-style: none; font-size: 10px; color: #7e8e72; }
+.response-metadata summary::-webkit-details-marker { display: none; }
+.response-metadata[open] summary svg { transform: rotate(90deg); }
+.response-metadata dl { margin: 12px 0 0; display: grid; gap: 9px; font-size: 10px; }
+.response-metadata dl > div { display: grid; grid-template-columns: 72px 1fr; gap: 10px; }
+.response-metadata dt { color: #8f9d83; }
+.response-metadata dd { margin: 0; color: #617657; overflow-wrap: anywhere; }
+.response-metadata dd code { font-size: 9px; }

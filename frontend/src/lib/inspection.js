@@ -118,3 +118,14 @@ export function downloadResponse(entry, context = globalThis) {
     if (url) (context.setTimeout || setTimeout)(() => context.URL.revokeObjectURL(url), 1000);
   }
 }
+
+export function requestTime(value) {
+  if (value == null || value === '') return null;
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return null;
+  return {
+    iso: date.toISOString(),
+    short: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    full: date.toLocaleString([], { dateStyle: 'medium', timeStyle: 'medium' }),
+  };
+}

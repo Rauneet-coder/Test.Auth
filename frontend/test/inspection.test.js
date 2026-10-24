@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { requestDetails, statusKind, statusLabel, formatDuration, sessionExpiry, responseJson, copyResponse, responseFilename, downloadResponse } from '../src/lib/inspection.js';
+import { requestDetails, statusKind, statusLabel, formatDuration, sessionExpiry, responseJson, copyResponse, responseFilename, downloadResponse, requestTime } from '../src/lib/inspection.js';
 
 test('request details use supported backend routes and preserve supplied metadata', () => {
   assert.equal(requestDetails({ action: 'getMe' }).path, '/api/auth/me');
@@ -55,4 +55,10 @@ test('response downloads use safe filenames and fail gracefully without browser 
   assert.equal(responseFilename({ action: 'getMe' }), 'aith-getMe.json');
   assert.equal(responseFilename({ action: '../../secret\n' }).includes('/'), false);
   assert.equal(downloadResponse({ data: {} }, {}), false);
+});
+
+test('request timestamps retain ISO semantics and reject invalid dates', () => {
+  assert.equal(requestTime('2026-10-24T12:00:00Z').iso, '2026-10-24T12:00:00.000Z');
+  assert.equal(requestTime('not a date'), null);
+  assert.equal(requestTime(undefined), null);
 });

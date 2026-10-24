@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from 'react';
-import { copyResponse, downloadResponse, formatDuration, requestDetails, responseJson, statusKind, statusLabel } from '../../lib/inspection';
+import { copyResponse, downloadResponse, formatDuration, requestDetails, requestTime, responseJson, statusKind, statusLabel } from '../../lib/inspection';
 import InspectorIcon from './InspectorIcon';
 import './inspector.css';
 
@@ -14,6 +14,7 @@ export default function ResponsePanel({ result, busy, onClear }) {
     setCopyState(copied ? 'copied' : 'failed');
   }
   const output = result ? responseJson(result.data) : '';
+  const time = requestTime(result?.time);
   const details = requestDetails(result || {});
   return (
     <section className="inspector-card response-panel" aria-labelledby={titleId}>
@@ -28,6 +29,7 @@ export default function ResponsePanel({ result, busy, onClear }) {
           <div className="response-tools"><button type="button" className="inspector-button response-tool" disabled={copyState === 'copying'} onClick={handleCopy}><InspectorIcon name={copyState === 'copied' ? 'check' : 'copy'} size={13} />{copyState === 'copied' ? 'Copied' : copyState === 'copying' ? 'Copying…' : 'Copy JSON'}</button><button type="button" className="inspector-button response-tool" onClick={() => setDownloadState(downloadResponse(result) ? 'downloaded' : 'failed')}><InspectorIcon name="download" size={13} />Save JSON</button></div>
           <p className="response-tool-feedback" role="status">{copyState === 'copied' ? 'Redacted response copied.' : copyState === 'failed' ? 'Copy unavailable. Select the response below to copy it manually.' : downloadState === 'downloaded' ? 'Redacted JSON file prepared for download.' : downloadState === 'failed' ? 'Download unavailable in this browser. Try copying the JSON.' : ''}</p>
           <div className="response-code-inset"><div className="response-code-heading"><span>Response body</span><span>JSON</span></div><pre className="response-code" tabIndex={0} aria-label="API response body"><code>{output}</code></pre></div>
+          <details className="response-metadata"><summary><InspectorIcon name="chevron" size={12} />Request details</summary><dl><div><dt>Action</dt><dd>{details.label}</dd></div><div><dt>Received</dt><dd>{time ? <time dateTime={time.iso}>{time.full}</time> : 'Time unavailable'}</dd></div>{result.id && <div><dt>Request ID</dt><dd><code>{result.id}</code></dd></div>}</dl></details>
           <p className="response-redaction-note"><InspectorIcon name="lock" size={11} />Credentials and tokens are hidden from this output.</p>
         </div>
       ) : (

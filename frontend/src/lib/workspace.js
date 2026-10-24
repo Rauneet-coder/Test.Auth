@@ -77,3 +77,10 @@ export function createActivityEntry(action, status, duration, data, now = new Da
 export function appendActivity(history, entry) {
   return [entry, ...history].slice(0, 50);
 }
+
+export function formAfterSuccess(action, fields, data) {
+  if (action === "register") {
+    return { ...fields, email: data.user.email, password: "", otp: "" };
+  }
+  return fields;
+}

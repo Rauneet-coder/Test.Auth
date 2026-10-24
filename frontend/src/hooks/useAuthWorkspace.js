@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authApi, describeRequestError } from "../services/api.js";
 import {
-  appendActivity, createActivityEntry, getAction, modeFromPath, pathFromMode, payloadForAction,
+  appendActivity, createActivityEntry, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction,
 } from "../lib/workspace.js";
 
 export default function useAuthWorkspace() {
@@ -23,7 +23,7 @@ export default function useAuthWorkspace() {
   const [history, setHistory] = useState([]);
   const [result, setResult] = useState(null);
   const [user] = useState(null);
-  const [sessionStatus] = useState("signed-out");
+  const [sessionStatus, setSessionStatus] = useState("signed-out");
   const [online] = useState(() => globalThis.navigator?.onLine !== false);
   const [expiresAt] = useState(null);
 
@@ -73,7 +73,14 @@ export default function useAuthWorkspace() {
       const response = await authApi[action](payloadForAction(action, payload), { signal: controller.signal });
       if (!mounted.current || controller.signal.aborted) return null;
       record(createActivityEntry(action, response.status, performance.now() - start, response.data));
-      setNotice({ type: "success", message: response.data.message });
+      if (action === "register") {
+        setFields((previous) => formAfterSuccess(action, previous, response.data));
+        setSessionStatus("verification-pending");
+        changeMode("verify");
+      }
+      setNotice({ type: "success", message: action === "register"
+        ? "Account created. Check your email for the verification code."
+        : response.data.message });
       return response;
     } catch (error) {
       if (!mounted.current || controller.signal.aborted) return null;
@@ -87,7 +94,7 @@ export default function useAuthWorkspace() {
       if (requestController.current === controller) requestController.current = null;
       if (mounted.current) setBusy("");
     }
-  }, [record]);
+  }, [changeMode, record]);
 
   const submit = useCallback((event) => {
     event?.preventDefault();

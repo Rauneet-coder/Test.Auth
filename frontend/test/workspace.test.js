@@ -137,3 +137,12 @@ test("changing form mode pushes the matching route without duplicate history ent
     if (originalHistory) Object.defineProperty(globalThis, "history", originalHistory); else delete globalThis.history;
   }
 });
+
+test("registration carries the account email into verification and clears credential fields", async () => {
+  const { formAfterSuccess } = await import("../src/lib/workspace.js");
+  const fields = { username: "Alex", email: "  Alex@Example.com ", password: "Secret123!", otp: "123456" };
+  assert.deepEqual(formAfterSuccess("register", fields, { user: { email: "Alex@Example.com" } }), {
+    username: "Alex", email: "Alex@Example.com", password: "", otp: "",
+  });
+  assert.equal(fields.password, "Secret123!");
+});

@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import "./auth.css";
 import AuthField from "./AuthField";
 import ModeTabs from "./ModeTabs";
@@ -14,6 +14,13 @@ const titles = { login: "Welcome back", register: "Create your account", verify:
 export default function AuthForm(props) {
   const formId = useId();
   const mode = props.mode || "login";
+  const previousMode = useRef(mode);
+  useEffect(() => {
+    if (previousMode.current !== mode && (mode === "verify" || previousMode.current === "verify")) {
+      document.getElementById(`${formId}-title`)?.focus();
+    }
+    previousMode.current = mode;
+  }, [formId, mode]);
   return (
     <section className="auth-form-panel" aria-labelledby={`${formId}-title`}>
       {mode !== "verify" && <ModeTabs mode={mode} onModeChange={props.onModeChange} disabled={!!props.busy} idPrefix={`${formId}-tab`} panelId={`${formId}-panel`} />}
@@ -72,7 +79,7 @@ function AuthFormContent({ formId, mode = "login", onModeChange, fields = {}, on
     <div id={`${formId}-panel`} role={mode === "verify" ? undefined : "tabpanel"} aria-labelledby={mode === "verify" ? `${formId}-title` : `${formId}-tab-${mode}`}>
       <div className="auth-form-heading">
         <span className="auth-eyebrow">YOUR ACCOUNT</span>
-        <h2 id={`${formId}-title`}>{titles[mode]}</h2>
+        <h2 id={`${formId}-title`} tabIndex={-1}>{titles[mode]}</h2>
         <p>{mode === "register" ? "A few details, and you’re ready to go." : mode === "verify" ? "Enter the six-digit code from your verification email." : "Enter your details to continue to your account."}</p>
       </div>
       <form className="auth-form" onSubmit={handleSubmit} noValidate aria-busy={!!busy}>

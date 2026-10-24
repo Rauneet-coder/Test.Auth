@@ -62,6 +62,7 @@ describe("POST /api/auth/refresh-token", () => {
             .set("Cookie", ["refreshToken=invalid.corrupted.jwttoken"]);
 
         expect(response.statusCode).toBe(401);
+        expect(response.body).toEqual({ message: "Invalid or expired refresh token" });
     });
 
     // ─── Positive Test: Refresh Token & Rotation ─────────────────────────────

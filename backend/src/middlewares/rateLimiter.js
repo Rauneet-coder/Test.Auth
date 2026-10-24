@@ -5,4 +5,9 @@ const defaultOptions = {
     limit: 100,
     standardHeaders: true,
     legacyHeaders: false,
+    statusCode: 429,
+    message: {
+        error: "TOO_MANY_REQUESTS",
+        message: "Too many requests from this IP, please try again later."
+    },
 };

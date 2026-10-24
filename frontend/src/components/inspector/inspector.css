@@ -118,3 +118,8 @@ button.activity-row.activity-row-selected { background: #f0f5e9; box-shadow: ins
 .activity-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 15px; padding: 0 2px; margin: 0 0 11px; font-size: 9px; color: #8a9a7b; }
 .activity-summary > span { display: inline-flex; align-items: center; gap: 5px; }
 .activity-summary .activity-visible-count { margin-left: auto; color: #a0ad91; }
+.activity-reset { margin-left: auto; white-space: nowrap; }
+.activity-empty-icon { display: grid; place-items: center; width: 37px; height: 37px; border: 1px solid #e0e7d8; border-radius: 10px; color: #98a88a; background: #f5f8ef; margin: 0 auto 12px; }
+.activity-empty-state h3 { font-size: 12px; font-weight: 600; color: #7d8d6f; margin: 0 0 6px; }
+.activity-empty-state p { font-size: 10px; line-height: 1.8; color: #a0ad91; max-width: 330px; margin: 0 auto; }
+.activity-empty-state .inspector-button { margin-top: 14px; font-size: 10px; min-height: 32px; padding: 6px 10px; }

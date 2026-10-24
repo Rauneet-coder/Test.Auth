@@ -5,11 +5,17 @@ import app from "../../src/app.js";
 import Usermodel from "../../src/models/user.model.js";
 
 describe("POST /api/auth/register", () => {
+    const validUser = {
+        username: "uniqueuser123",
+        email: "unique.testuser@example.com",
+        password: "SecurePassword123!"
+    };
+
     beforeAll(async () => {
         await Usermodel.deleteMany({
             $or: [
-                { email: "unique.testuser@example.com" },
-                { username: "uniqueuser123" }
+                { email: validUser.email },
+                { username: validUser.username }
             ]
         });
     });
@@ -17,8 +23,8 @@ describe("POST /api/auth/register", () => {
     afterAll(async () => {
         await Usermodel.deleteMany({
             $or: [
-                { email: "unique.testuser@example.com" },
-                { username: "uniqueuser123" },
+                { email: validUser.email },
+                { username: validUser.username },
                 { email: "another.user@example.com" }
             ]
         });

@@ -103,3 +103,8 @@
 .activity-duration { min-width: 44px; text-align: right; font-size: 9px; color: #92a082; font-variant-numeric: tabular-nums; }
 .activity-row time { color: #9aa68b; font-size: 9px; font-variant-numeric: tabular-nums; }
 .activity-empty-state { border: 1px dashed #dfe6d7; border-radius: 9px; padding: 23px; text-align: center; font-size: 11px; line-height: 1.7; color: #99a48c; margin: 0; }
+button.activity-row { border: 0; border-radius: 0; background: #fff; cursor: pointer; }
+button.activity-row:hover { background: #f7f9f3; }
+button.activity-row.activity-row-selected { background: #f0f5e9; box-shadow: inset 3px 0 #6e9760; }
+.activity-row > svg { color: #9baa8c; flex-shrink: 0; }
+.activity-row-selected .activity-path { color: #355d2c; }

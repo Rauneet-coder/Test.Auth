@@ -3,7 +3,7 @@ import { formatDuration, requestDetails, requestTime, statusKind, statusLabel } 
 import InspectorIcon from './InspectorIcon';
 import './inspector.css';
 
-export default function ActivityPanel({ history = [] }) {
+export default function ActivityPanel({ history = [], selectedId, onSelect }) {
   const titleId = useId();
   return (
     <section className="activity-panel" aria-labelledby={titleId}>
@@ -11,7 +11,7 @@ export default function ActivityPanel({ history = [] }) {
       {history.length ? <ol className="activity-rows">{history.map((entry, index) => {
         const request = requestDetails(entry);
         const time = requestTime(entry.time);
-        return <li key={entry.id || `${entry.time}-${index}`}><div className="activity-row"><span className={`activity-state-dot activity-state-${statusKind(entry.status)}`} /><span className="inspector-method">{request.method}</span><code className="activity-path">{request.path}</code><span className={`activity-response-status inspector-status-${statusKind(entry.status)}`} title={statusLabel(entry.status)}>{entry.status}</span><span className="activity-duration">{formatDuration(entry.duration)}</span>{time && <time dateTime={time.iso} title={time.full}>{time.short}</time>}</div></li>;
+        return <li key={entry.id || `${entry.time}-${index}`}><button type="button" className={`activity-row ${entry.id != null && entry.id === selectedId ? 'activity-row-selected' : ''}`} aria-pressed={entry.id != null && entry.id === selectedId} aria-label={`${request.label}, ${statusLabel(entry.status)}, ${formatDuration(entry.duration)}${time ? `, ${time.short}` : ''}`} onClick={() => onSelect(entry)}><span className={`activity-state-dot activity-state-${statusKind(entry.status)}`} /><span className="inspector-method">{request.method}</span><code className="activity-path">{request.path}</code><span className={`activity-response-status inspector-status-${statusKind(entry.status)}`} title={statusLabel(entry.status)}>{entry.status}</span><span className="activity-duration">{formatDuration(entry.duration)}</span>{time && <time dateTime={time.iso} title={time.full}>{time.short}</time>}<InspectorIcon name="arrow" size={13} /></button></li>;
       })}</ol> : <p className="activity-empty-state">Your recent requests will show up here.</p>}
     </section>
   );

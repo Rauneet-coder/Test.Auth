@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import "./auth.css";
 import AuthField from "./AuthField";
+import ModeTabs from "./ModeTabs";
 import { validateForm } from "../../lib/formValidation";
 
 const EMPTY_ERRORS = {};
@@ -41,6 +42,8 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
   );
   return (
     <section className="auth-form-panel" aria-labelledby={`${formId}-title`}>
+      {mode !== "verify" && <ModeTabs mode={mode} onModeChange={onModeChange} disabled={!!busy} idPrefix={`${formId}-tab`} panelId={`${formId}-panel`} />}
+      <div id={`${formId}-panel`} role={mode === "verify" ? undefined : "tabpanel"} aria-labelledby={mode === "verify" ? `${formId}-title` : `${formId}-tab-${mode}`}>
       <div className="auth-form-heading">
         <span className="auth-eyebrow">YOUR ACCOUNT</span>
         <h2 id={`${formId}-title`}>{titles[mode]}</h2>
@@ -52,6 +55,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
         {mode === "verify" ? field("otp", "Verification code") : field("password", "Password", "password")}
         <button className="auth-submit" type="submit">{mode === "register" ? "Create account" : mode === "verify" ? "Verify email" : "Sign in"}</button>
       </form>
+      </div>
     </section>
   );
 }

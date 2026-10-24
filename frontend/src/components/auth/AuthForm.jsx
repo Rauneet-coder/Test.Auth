@@ -5,6 +5,7 @@ import ModeTabs from "./ModeTabs";
 import PasswordChecklist from "./PasswordChecklist";
 import OtpField from "./OtpField";
 import FormNotice from "./FormNotice";
+import ModeLinks from "./ModeLinks";
 import { validateForm } from "../../lib/formValidation";
 
 const EMPTY_ERRORS = {};
@@ -79,6 +80,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
           {busy ? (ownPending ? pendingLabel : "Request in progress…") : mode === "register" ? "Create account" : mode === "verify" ? "Verify email" : "Sign in"}
         </button>
       </form>
+      <ModeLinks mode={mode} onModeChange={onModeChange} disabled={!!busy} />
       </div>
     </section>
   );

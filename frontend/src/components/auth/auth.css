@@ -63,3 +63,9 @@
 .auth-verification-guide p { margin:0 0 5px; font-size:13px; color:var(--auth-ink); overflow-wrap:anywhere; }
 .auth-verification-guide strong { font-weight:600; }
 .auth-verification-guide span { display:block; color:var(--auth-muted); font-size:12px; line-height:1.6; }
+
+.auth-mode-links { border-top:1px solid #edf0ed; margin-top:24px; padding-top:21px; text-align:center; font-size:13px; line-height:1.7; color:var(--auth-muted); }
+.auth-mode-links p { margin:0 0 9px; }
+.auth-mode-links button { border:0; padding:3px 2px; background:transparent; color:var(--auth-primary); font:inherit; font-weight:600; cursor:pointer; text-underline-offset:3px; }
+.auth-mode-links button:hover { text-decoration:underline; }
+.auth-mode-links .auth-verify-link { font-size:12px; font-weight:500; }

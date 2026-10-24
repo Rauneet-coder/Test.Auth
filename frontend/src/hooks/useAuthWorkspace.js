@@ -119,7 +119,13 @@ export default function useAuthWorkspace() {
       const details = describeRequestError(error, { online: globalThis.navigator?.onLine !== false });
       record(createActivityEntry(requestAction, details.status, performance.now() - start,
         error.response?.data || { message: details.message }));
-      if (action === "refreshToken") setSessionStatus("signed-out");
+      if (error.response?.status === 401) {
+        setAccessToken(null);
+        setUser(null);
+        setSessionStatus("expired");
+      } else if (action === "refreshToken") {
+        setSessionStatus("signed-out");
+      }
       setNotice({ type: "error", message: details.message });
       return null;
     } finally {

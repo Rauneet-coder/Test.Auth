@@ -186,3 +186,27 @@ test("an explicit refresh rotates once and then restores identity with the new a
     ]);
   } finally { setAccessToken(null); api.defaults.adapter = previous; }
 });
+
+test("a rejected session clears the in-memory access token before the next profile request", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { default: useAuthWorkspace } = await import("../src/hooks/useAuthWorkspace.js");
+  const { default: api, setAccessToken } = await import("../src/services/api.js");
+  const previous = api.defaults.adapter;
+  const authorization = [];
+  api.defaults.adapter = async (config) => {
+    authorization.push(config.headers.Authorization);
+    const error = new Error("Expired");
+    error.response = { status: 401, data: { message: "Unauthorized" } };
+    throw error;
+  };
+  let workspace;
+  function Probe() { workspace = useAuthWorkspace(); return null; }
+  try {
+    renderToStaticMarkup(createElement(Probe));
+    setAccessToken("expired-token");
+    await workspace.run("getMe");
+    await workspace.run("getMe");
+    assert.deepEqual(authorization, ["Bearer expired-token", undefined]);
+  } finally { setAccessToken(null); api.defaults.adapter = previous; }
+});

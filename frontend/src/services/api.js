@@ -46,6 +46,9 @@ export function describeRequestError(error, { online = true } = {}) {
   } else if (error?.code === "ERR_CANCELED") {
     kind = "cancelled";
     message = "The request was cancelled.";
+  } else if (status === 401) {
+    kind = "unauthorized";
+    message = "Your session is no longer active. Sign in again or refresh your session.";
   } else if (status === 429) {
     kind = "rate-limit";
     const retryAfter = retryDelaySeconds(error.response?.headers?.["retry-after"]);

@@ -28,3 +28,13 @@ test("unexpected backend error shapes cannot break error handling", async () => 
   assert.equal(describeRequestError({ response: { status: 400, data: { errors: "wrong shape", message: "Invalid email" } } }).message, "Invalid email");
   assert.equal(describeRequestError({ response: { status: 400, data: { errors: [{ message: "Use a valid email." }, null, { message: 2 }] } } }).message, "Use a valid email.");
 });
+
+test("rate limiting gives actionable Retry-After guidance without retrying a request", async () => {
+  const { describeRequestError, retryDelaySeconds } = await import("../src/services/api.js");
+  assert.equal(retryDelaySeconds("12"), 12);
+  assert.equal(retryDelaySeconds("invalid"), null);
+  assert.equal(retryDelaySeconds("-1"), null);
+  assert.equal(retryDelaySeconds("Sat, 24 Oct 2026 10:01:00 GMT", Date.parse("2026-10-24T10:00:00Z")), 60);
+  assert.match(describeRequestError({ response: { status: 429, headers: { "retry-after": "30" } } }).message, /30 seconds/);
+  assert.equal(describeRequestError({ response: { status: 429 } }).kind, "rate-limit");
+});

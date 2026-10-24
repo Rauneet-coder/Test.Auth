@@ -16,6 +16,13 @@ api.interceptors.request.use((config) => {
   if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
   return config;
 });
+export function retryDelaySeconds(value, now = Date.now()) {
+  if (value === undefined || value === null || value === "") return null;
+  const seconds = Number(value);
+  const delay = Number.isFinite(seconds) ? seconds : (Date.parse(value) - now) / 1000;
+  return Number.isFinite(delay) && delay >= 0 ? Math.ceil(delay) : null;
+}
+
 export function describeRequestError(error, { online = true } = {}) {
   const status = error?.response?.status;
   const body = error?.response?.data;
@@ -37,6 +44,12 @@ export function describeRequestError(error, { online = true } = {}) {
   } else if (error?.code === "ERR_CANCELED") {
     kind = "cancelled";
     message = "The request was cancelled.";
+  } else if (status === 429) {
+    kind = "rate-limit";
+    const retryAfter = retryDelaySeconds(error.response?.headers?.["retry-after"]);
+    message = retryAfter === null
+      ? "Too many attempts. Wait a moment before trying again."
+      : `Too many attempts. Try again in ${retryAfter} seconds.`;
   } else if (!status) {
     kind = "connection";
     message = "Could not reach the API. Check the backend connection and try again.";

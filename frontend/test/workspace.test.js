@@ -146,3 +146,11 @@ test("registration carries the account email into verification and clears creden
   });
   assert.equal(fields.password, "Secret123!");
 });
+
+test("verification clears the used code and keeps email ready for sign in", async () => {
+  const { formAfterSuccess } = await import("../src/lib/workspace.js");
+  const next = formAfterSuccess("verifyEmail", { username: "Alex", email: "Alex@example.com", password: "old", otp: "012345" }, { user: { email: "Alex@example.com" } });
+  assert.equal(next.otp, "");
+  assert.equal(next.password, "");
+  assert.equal(next.email, "Alex@example.com");
+});

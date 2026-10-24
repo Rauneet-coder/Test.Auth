@@ -75,12 +75,17 @@ export default function useAuthWorkspace() {
       record(createActivityEntry(action, response.status, performance.now() - start, response.data));
       if (action === "register") {
         setFields((previous) => formAfterSuccess(action, previous, response.data));
-        setSessionStatus("verification-pending");
+        setSessionStatus((previous) => previous === "signed-in" ? previous : "verification-pending");
         changeMode("verify");
+      }
+      if (action === "verifyEmail") {
+        setFields((previous) => formAfterSuccess(action, previous, response.data));
+        setSessionStatus((previous) => previous === "signed-in" ? previous : "signed-out");
+        changeMode("login");
       }
       setNotice({ type: "success", message: action === "register"
         ? "Account created. Check your email for the verification code."
-        : response.data.message });
+        : action === "verifyEmail" ? "Email verified. You can sign in now." : response.data.message });
       return response;
     } catch (error) {
       if (!mounted.current || controller.signal.aborted) return null;

@@ -79,7 +79,8 @@ export function assertAuthResponse(action, response) {
   const needsToken = ["login", "refreshToken"].includes(action);
   if (!record(data) || !text(data.message) ||
       (needsUser && (!record(data.user) || !text(data.user.username) || !text(data.user.email))) ||
-      (needsToken && !text(data.accessToken))) {
+      (needsToken && !text(data.accessToken)) ||
+      (action === "verifyEmail" && data.user?.verified !== true)) {
     const error = new Error("The API returned an incomplete response. Check the backend connection and try again.");
     error.code = "INVALID_RESPONSE";
     error.response = { status: response?.status, data: { message: error.message } };

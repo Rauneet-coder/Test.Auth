@@ -71,3 +71,10 @@ test("in-memory credentials are scoped to profile requests and can be cleared", 
     api.defaults.adapter = previous;
   }
 });
+
+test("verification responses must explicitly confirm the account was verified", () => {
+  const data = { message: "OK", user: { username: "Alex", email: "Alex@example.com", verified: false } };
+  assert.throws(() => assertAuthResponse("verifyEmail", { status: 200, data }), { code: "INVALID_RESPONSE" });
+  data.user.verified = true;
+  assert.equal(assertAuthResponse("verifyEmail", { status: 200, data }).data, data);
+});

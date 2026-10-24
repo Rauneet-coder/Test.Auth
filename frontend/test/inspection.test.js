@@ -70,3 +70,10 @@ test('history search matches paths, action labels, and statuses without mutating
   assert.equal(filterRequests(history, { query: '/login' }).length, 1);
   assert.equal(history.length, 2);
 });
+
+test('action filters compose with search instead of discarding it', () => {
+  const history = [{ action: 'login', status: 200 }, { action: 'login', status: 401 }, { action: 'getMe', status: 200 }];
+  assert.equal(filterRequests(history, { action: 'login' }).length, 2);
+  assert.equal(filterRequests(history, { action: 'login', query: '401' }).length, 1);
+  assert.equal(filterRequests(history, { action: 'register' }).length, 0);
+});

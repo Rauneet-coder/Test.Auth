@@ -130,11 +130,13 @@ export function requestTime(value) {
   };
 }
 
-export function filterRequests(history = [], { query = '' } = {}) {
+export function filterRequests(history = [], { query = '', action = 'all' } = {}) {
   const needle = String(query).trim().toLocaleLowerCase();
-  if (!needle) return history;
   return history.filter((entry) => {
+    if (action !== 'all' && entry.action !== action) return false;
     const details = requestDetails(entry);
     return [details.method, details.path, details.label, entry.action, entry.status, statusLabel(entry.status)].join(' ').toLocaleLowerCase().includes(needle);
   });
 }
+
+export const requestActionOptions = Object.entries(actions).map(([value, details]) => ({ value, label: details[2] }));

@@ -12,11 +12,17 @@ const EMPTY_ERRORS = {};
 const titles = { login: "Welcome back", register: "Create your account", verify: "Check your inbox" };
 
 export default function AuthForm(props) {
-  return <AuthFormContent key={props.mode || "login"} {...props} />;
+  const formId = useId();
+  const mode = props.mode || "login";
+  return (
+    <section className="auth-form-panel" aria-labelledby={`${formId}-title`}>
+      {mode !== "verify" && <ModeTabs mode={mode} onModeChange={props.onModeChange} disabled={!!props.busy} idPrefix={`${formId}-tab`} panelId={`${formId}-panel`} />}
+      <AuthFormContent key={mode} {...props} mode={mode} formId={formId} />
+    </section>
+  );
 }
 
-function AuthFormContent({ mode = "login", onModeChange, fields = {}, onFieldChange, busy = "", notice, errors = EMPTY_ERRORS, onSubmit, onDismissNotice }) {
-  const formId = useId();
+function AuthFormContent({ formId, mode = "login", onModeChange, fields = {}, onFieldChange, busy = "", notice, errors = EMPTY_ERRORS, onSubmit, onDismissNotice }) {
   const fieldRefs = useRef({});
   const [clientErrors, setClientErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -63,9 +69,7 @@ function AuthFormContent({ mode = "login", onModeChange, fields = {}, onFieldCha
       hint={name === "username" ? "Choose a username between 3 and 30 characters." : undefined} />
   );
   return (
-    <section className="auth-form-panel" aria-labelledby={`${formId}-title`}>
-      {mode !== "verify" && <ModeTabs mode={mode} onModeChange={onModeChange} disabled={!!busy} idPrefix={`${formId}-tab`} panelId={`${formId}-panel`} />}
-      <div id={`${formId}-panel`} role={mode === "verify" ? undefined : "tabpanel"} aria-labelledby={mode === "verify" ? `${formId}-title` : `${formId}-tab-${mode}`}>
+    <div id={`${formId}-panel`} role={mode === "verify" ? undefined : "tabpanel"} aria-labelledby={mode === "verify" ? `${formId}-title` : `${formId}-tab-${mode}`}>
       <div className="auth-form-heading">
         <span className="auth-eyebrow">YOUR ACCOUNT</span>
         <h2 id={`${formId}-title`}>{titles[mode]}</h2>
@@ -90,6 +94,5 @@ function AuthFormContent({ mode = "login", onModeChange, fields = {}, onFieldCha
       </form>
       <ModeLinks mode={mode} onModeChange={onModeChange} disabled={!!busy} />
       </div>
-    </section>
   );
 }

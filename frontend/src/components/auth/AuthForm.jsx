@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import "./auth.css";
 import AuthField from "./AuthField";
 import ModeTabs from "./ModeTabs";
+import PasswordChecklist from "./PasswordChecklist";
 import { validateForm } from "../../lib/formValidation";
 
 const EMPTY_ERRORS = {};
@@ -55,6 +56,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
         {mode === "register" && field("username", "Username")}
         {field("email", "Email address", "email")}
         {mode === "verify" ? field("otp", "Verification code") : field("password", "Password", "password")}
+        {mode === "register" && <PasswordChecklist value={fields.password || ""} />}
         <button className="auth-submit" type="submit">{mode === "register" ? "Create account" : mode === "verify" ? "Verify email" : "Sign in"}</button>
       </form>
       </div>

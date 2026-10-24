@@ -115,3 +115,6 @@ button.activity-row.activity-row-selected { background: #f0f5e9; box-shadow: ins
 .activity-search input::placeholder { color: #9eaa91; }
 .activity-filter { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; color: #91a07f; }
 .activity-filter select { height: 35px; padding: 7px 24px 7px 10px; border: 1px solid #e0e7d9; border-radius: 7px; background: white; color: #6c805d; font-size: 10px; max-width: 180px; }
+.activity-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 15px; padding: 0 2px; margin: 0 0 11px; font-size: 9px; color: #8a9a7b; }
+.activity-summary > span { display: inline-flex; align-items: center; gap: 5px; }
+.activity-summary .activity-visible-count { margin-left: auto; color: #a0ad91; }

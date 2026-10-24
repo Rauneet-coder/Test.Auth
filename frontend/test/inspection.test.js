@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { requestDetails, statusKind, statusLabel, formatDuration, sessionExpiry, responseJson, copyResponse, responseFilename, downloadResponse, requestTime, filterRequests } from '../src/lib/inspection.js';
+import { requestDetails, statusKind, statusLabel, formatDuration, sessionExpiry, responseJson, copyResponse, responseFilename, downloadResponse, requestTime, filterRequests, requestCounts } from '../src/lib/inspection.js';
 
 test('request details use supported backend routes and preserve supplied metadata', () => {
   assert.equal(requestDetails({ action: 'getMe' }).path, '/api/auth/me');
@@ -84,4 +84,9 @@ test('status filters distinguish successful HTTP responses and network failures'
   assert.equal(filterRequests(history, { status: 'error' }).length, 2);
   assert.equal(filterRequests(history, { status: 'network' }).length, 1);
   assert.equal(filterRequests(history, { status: 'error', action: 'getMe' }).length, 1);
+});
+
+test('history counts derive from entries and keep network errors inside the error total', () => {
+  assert.deepEqual(requestCounts([{ status: 201 }, { status: 401 }, { status: 'ERR' }, { status: undefined }]), { total: 4, success: 1, error: 2, network: 1 });
+  assert.deepEqual(requestCounts([]), { total: 0, success: 0, error: 0, network: 0 });
 });

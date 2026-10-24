@@ -142,3 +142,14 @@ export function filterRequests(history = [], { query = '', action = 'all', statu
 }
 
 export const requestActionOptions = Object.entries(actions).map(([value, details]) => ({ value, label: details[2] }));
+
+export function requestCounts(history = []) {
+  return history.reduce((counts, entry) => {
+    counts.total += 1;
+    const kind = statusKind(entry.status);
+    if (kind === 'success') counts.success += 1;
+    if (kind === 'error') counts.error += 1;
+    if (entry.status === 'ERR') counts.network += 1;
+    return counts;
+  }, { total: 0, success: 0, error: 0, network: 0 });
+}

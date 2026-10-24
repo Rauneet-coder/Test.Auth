@@ -79,8 +79,12 @@ export function appendActivity(history, entry) {
 }
 
 export function formAfterSuccess(action, fields, data) {
-  if (action === "register" || action === "verifyEmail") {
+  if (action === "register" || action === "verifyEmail" || action === "login") {
     return { ...fields, email: data.user.email, password: "", otp: "" };
   }
   return fields;
+}
+
+export function profileFromResponse(data) {
+  return { username: data.user.username, email: data.user.email };
 }

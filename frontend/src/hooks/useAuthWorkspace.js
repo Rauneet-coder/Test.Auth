@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { authApi, describeRequestError } from "../services/api.js";
+import { authApi, describeRequestError, setAccessToken } from "../services/api.js";
 import {
-  appendActivity, createActivityEntry, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction,
+  appendActivity, createActivityEntry, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction, profileFromResponse,
 } from "../lib/workspace.js";
 
 export default function useAuthWorkspace() {
@@ -22,7 +22,7 @@ export default function useAuthWorkspace() {
   const [busy, setBusy] = useState("");
   const [history, setHistory] = useState([]);
   const [result, setResult] = useState(null);
-  const [user] = useState(null);
+  const [user, setUser] = useState(null);
   const [sessionStatus, setSessionStatus] = useState("signed-out");
   const [online] = useState(() => globalThis.navigator?.onLine !== false);
   const [expiresAt] = useState(null);
@@ -73,6 +73,20 @@ export default function useAuthWorkspace() {
       const response = await authApi[action](payloadForAction(action, payload), { signal: controller.signal });
       if (!mounted.current || controller.signal.aborted) return null;
       record(createActivityEntry(action, response.status, performance.now() - start, response.data));
+      if (action === "login" || action === "getMe") {
+        if (action === "login") {
+          setAccessToken(response.data.accessToken);
+          setFields((previous) => formAfterSuccess(action, previous, response.data));
+        }
+        setUser(profileFromResponse(response.data));
+        setSessionStatus("signed-in");
+      }
+      if (action === "logout" || action === "logoutAll") {
+        setAccessToken(null);
+        setUser(null);
+        setSessionStatus("signed-out");
+        setFields((previous) => ({ ...previous, password: "", otp: "" }));
+      }
       if (action === "register") {
         setFields((previous) => formAfterSuccess(action, previous, response.data));
         setSessionStatus((previous) => previous === "signed-in" ? previous : "verification-pending");

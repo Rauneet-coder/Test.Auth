@@ -154,3 +154,10 @@ test("verification clears the used code and keeps email ready for sign in", asyn
   assert.equal(next.password, "");
   assert.equal(next.email, "Alex@example.com");
 });
+
+test("session identity contains display fields and excludes unexpected sensitive backend fields", async () => {
+  const { profileFromResponse, formAfterSuccess } = await import("../src/lib/workspace.js");
+  const data = { user: { username: "Alex", email: "Alex@example.com", password: "hash", refreshToken: "secret", role: "admin" } };
+  assert.deepEqual(profileFromResponse(data), { username: "Alex", email: "Alex@example.com" });
+  assert.equal(formAfterSuccess("login", { password: "secret", otp: "123456" }, data).password, "");
+});

@@ -80,7 +80,7 @@ describe("POST /api/auth/verify-email", () => {
             user: createdUser._id,
             email: testUser.email,
             otpHash: expiredHash,
-            deletedAt: new Date(Date.now() - 5 * 60 * 1000)
+            deletedAt: new Date(Date.now() - 5 * 60 * 1000) // Expired 5 minutes ago
         });
 
         const response = await request(app)

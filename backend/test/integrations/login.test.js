@@ -66,6 +66,9 @@ describe("POST /api/auth/login", () => {
                 email: unverifiedUser.email,
                 password: unverifiedUser.password
             });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({ message: "Email not verified" });
     });
 
     it("should return 400 if email or password are missing", async () => {

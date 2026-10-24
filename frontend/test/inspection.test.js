@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { requestDetails, statusKind, statusLabel, formatDuration, sessionExpiry, responseJson, copyResponse, responseFilename, downloadResponse, requestTime } from '../src/lib/inspection.js';
+import { requestDetails, statusKind, statusLabel, formatDuration, sessionExpiry, responseJson, copyResponse, responseFilename, downloadResponse, requestTime, filterRequests } from '../src/lib/inspection.js';
 
 test('request details use supported backend routes and preserve supplied metadata', () => {
   assert.equal(requestDetails({ action: 'getMe' }).path, '/api/auth/me');
@@ -61,4 +61,12 @@ test('request timestamps retain ISO semantics and reject invalid dates', () => {
   assert.equal(requestTime('2026-10-24T12:00:00Z').iso, '2026-10-24T12:00:00.000Z');
   assert.equal(requestTime('not a date'), null);
   assert.equal(requestTime(undefined), null);
+});
+
+test('history search matches paths, action labels, and statuses without mutating history', () => {
+  const history = [{ id: '1', action: 'getMe', status: 401 }, { id: '2', action: 'login', status: 200 }];
+  assert.deepEqual(filterRequests(history, { query: '  GET PROFILE ' }).map((entry) => entry.id), ['1']);
+  assert.deepEqual(filterRequests(history, { query: 'unauthorized' }).map((entry) => entry.id), ['1']);
+  assert.equal(filterRequests(history, { query: '/login' }).length, 1);
+  assert.equal(history.length, 2);
 });

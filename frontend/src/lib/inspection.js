@@ -129,3 +129,12 @@ export function requestTime(value) {
     full: date.toLocaleString([], { dateStyle: 'medium', timeStyle: 'medium' }),
   };
 }
+
+export function filterRequests(history = [], { query = '' } = {}) {
+  const needle = String(query).trim().toLocaleLowerCase();
+  if (!needle) return history;
+  return history.filter((entry) => {
+    const details = requestDetails(entry);
+    return [details.method, details.path, details.label, entry.action, entry.status, statusLabel(entry.status)].join(' ').toLocaleLowerCase().includes(needle);
+  });
+}

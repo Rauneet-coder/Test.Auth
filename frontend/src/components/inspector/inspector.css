@@ -108,3 +108,8 @@ button.activity-row:hover { background: #f7f9f3; }
 button.activity-row.activity-row-selected { background: #f0f5e9; box-shadow: inset 3px 0 #6e9760; }
 .activity-row > svg { color: #9baa8c; flex-shrink: 0; }
 .activity-row-selected .activity-path { color: #355d2c; }
+.activity-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.activity-search { position: relative; display: flex; align-items: center; min-width: 150px; max-width: 300px; flex: 1; }
+.activity-search > svg { position: absolute; left: 11px; color: #9ba88d; pointer-events: none; }
+.activity-search input { display: block; width: 100%; height: 35px; border: 1px solid #e0e7d9; border-radius: 7px; background: #fff; color: #526b45; padding: 8px 10px 8px 33px; font-size: 10px; }
+.activity-search input::placeholder { color: #9eaa91; }

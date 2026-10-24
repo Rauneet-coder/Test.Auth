@@ -20,3 +20,12 @@
 .session-identity-text { min-width: 0; }
 .session-identity h3 { font-size: 15px; line-height: 1.5; margin: 0; font-weight: 650; letter-spacing: -.25px; overflow-wrap: anywhere; }
 .session-identity p { font-size: 11px; line-height: 1.6; color: #7a887f; margin: 3px 0 0; overflow-wrap: anywhere; }
+.inspector-button { min-height: 38px; border: 1px solid #e0e7e0; background: #fff; color: #3f574b; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 7px; padding: 9px 12px; font-size: 11px; font-weight: 500; line-height: 1.5; }
+.inspector-button:not(:disabled):hover { background: #f3f7f1; border-color: #ccdacc; }
+.inspector-button kbd { margin-left: auto; color: #85917f; font-size: 8px; font-family: inherit; font-weight: 500; }
+.session-request-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+.session-request-footer { margin-top: 17px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.session-request-footer p { margin: 0; font-size: 9px; line-height: 1.6; color: #86917e; }
+.session-signout-actions { display: flex; flex: 0 0 auto; gap: 12px; }
+.session-signout-actions button { border: 0; background: transparent; padding: 3px 0; font-size: 9px; color: #64775d; text-decoration: underline; text-underline-offset: 3px; }
+.session-signout-actions button:not(:disabled):hover { color: #235c46; }

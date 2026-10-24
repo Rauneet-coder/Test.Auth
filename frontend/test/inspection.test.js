@@ -77,3 +77,11 @@ test('action filters compose with search instead of discarding it', () => {
   assert.equal(filterRequests(history, { action: 'login', query: '401' }).length, 1);
   assert.equal(filterRequests(history, { action: 'register' }).length, 0);
 });
+
+test('status filters distinguish successful HTTP responses and network failures', () => {
+  const history = [{ action: 'getMe', status: 200 }, { action: 'getMe', status: 401 }, { action: 'login', status: 'ERR' }];
+  assert.equal(filterRequests(history, { status: 'success' }).length, 1);
+  assert.equal(filterRequests(history, { status: 'error' }).length, 2);
+  assert.equal(filterRequests(history, { status: 'network' }).length, 1);
+  assert.equal(filterRequests(history, { status: 'error', action: 'getMe' }).length, 1);
+});

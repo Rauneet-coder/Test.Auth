@@ -38,3 +38,12 @@ test("rate limiting gives actionable Retry-After guidance without retrying a req
   assert.match(describeRequestError({ response: { status: 429, headers: { "retry-after": "30" } } }).message, /30 seconds/);
   assert.equal(describeRequestError({ response: { status: 429 } }).kind, "rate-limit");
 });
+
+test("every auth operation supports cancellation before dispatch", async () => {
+  const { authApi } = await import("../src/services/api.js");
+  const controller = new AbortController();
+  controller.abort();
+  for (const action of Object.keys(authApi)) {
+    await assert.rejects(authApi[action]({}, { signal: controller.signal }), { code: "ERR_CANCELED" });
+  }
+});

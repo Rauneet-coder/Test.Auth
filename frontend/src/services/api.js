@@ -86,15 +86,19 @@ export function assertAuthResponse(action, response) {
   return response;
 }
 
-const request = async (action, operation) => assertAuthResponse(action, await operation());
+async function request(action, payload, options = {}) {
+  const { method, path } = getAction(action);
+  const response = await api.request({ method, url: path, data: payload, signal: options.signal });
+  return assertAuthResponse(action, response);
+}
 
 export const authApi = {
-  register: (payload) => request("register", () => api.post("/api/auth/register", payload)),
-  login: (payload) => request("login", () => api.post("/api/auth/login", payload)),
-  verifyEmail: (payload) => request("verifyEmail", () => api.post("/api/auth/verify-email", payload)),
-  refreshToken: () => request("refreshToken", () => api.post("/api/auth/refresh-token")),
-  logout: () => request("logout", () => api.post("/api/auth/logout")),
-  logoutAll: () => request("logoutAll", () => api.post("/api/auth/logout-all")),
-  getMe: () => request("getMe", () => api.get("/api/auth/me")),
+  register: (payload, options) => request("register", payload, options),
+  login: (payload, options) => request("login", payload, options),
+  verifyEmail: (payload, options) => request("verifyEmail", payload, options),
+  refreshToken: (_payload, options) => request("refreshToken", undefined, options),
+  logout: (_payload, options) => request("logout", undefined, options),
+  logoutAll: (_payload, options) => request("logoutAll", undefined, options),
+  getMe: (_payload, options) => request("getMe", undefined, options),
 };
 export default api;

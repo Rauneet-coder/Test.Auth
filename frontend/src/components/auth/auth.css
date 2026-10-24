@@ -1,0 +1,13 @@
+/* Authentication controls are scoped to avoid affecting the playground. */
+.auth-form-panel { --auth-ink:#182c26; --auth-muted:#64716a; --auth-primary:#235c46; --auth-border:#e2e8e3; width:100%; color:var(--auth-ink); background:#fff; padding:40px; border-radius:20px; }
+.auth-form-heading { margin-bottom:28px; }
+.auth-eyebrow { display:block; color:var(--auth-primary); font-size:11px; font-weight:700; letter-spacing:.14em; margin-bottom:14px; }
+.auth-form-heading h2 { font-size:30px; line-height:1.2; letter-spacing:-1px; margin:0 0 10px; color:var(--auth-ink); }
+.auth-form-heading p { font-size:14px; line-height:1.65; color:var(--auth-muted); margin:0; }
+.auth-form { display:grid; gap:20px; }
+.auth-field { display:grid; gap:8px; min-width:0; }
+.auth-label { font-size:13px; font-weight:600; color:var(--auth-ink); }
+.auth-input { width:100%; min-width:0; height:48px; border:1px solid var(--auth-border); border-radius:9px; background:#fff; padding:0 14px; font:inherit; font-size:14px; color:var(--auth-ink); }
+.auth-input::placeholder { color:#78837d; }
+.auth-submit { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; min-height:48px; border:1px solid var(--auth-primary); border-radius:9px; padding:12px 18px; background:var(--auth-primary); color:#fff; font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+.auth-submit:hover { background:#194b38; }

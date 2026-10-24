@@ -18,5 +18,14 @@ describe("Rate Limiting Middleware", () => {
         testApp.use("/api/test-rate-limit", testLimiter, (_req, res) => {
             res.status(200).json({ status: "success" });
         });
+
+        const res1 = await request(testApp).get("/api/test-rate-limit");
+        expect(res1.statusCode).toBe(200);
+
+        const res2 = await request(testApp).get("/api/test-rate-limit");
+        expect(res2.statusCode).toBe(200);
+
+        const res3 = await request(testApp).get("/api/test-rate-limit");
+        expect(res3.statusCode).toBe(200);
     });
 });

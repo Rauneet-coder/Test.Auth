@@ -1,11 +1,19 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
+import { sessionExpiry } from '../../lib/inspection';
 import InspectorIcon from './InspectorIcon';
 import './inspector.css';
 
-export default function SessionPanel({ user, busy, onAction }) {
+export default function SessionPanel({ user, busy, onAction, expiresAt }) {
   const titleId = useId();
   const confirmId = useId();
   const [confirmAll, setConfirmAll] = useState(false);
+  const [now, setNow] = useState(Date.now);
+  const expiry = sessionExpiry(expiresAt, now);
+  useEffect(() => {
+    if (!user || !expiresAt) return undefined;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [user, expiresAt]);
   const name = user?.username || user?.name || 'Your account';
   const initial = Array.from(name.trim())[0]?.toLocaleUpperCase() || 'A';
   return (
@@ -21,6 +29,7 @@ export default function SessionPanel({ user, busy, onAction }) {
           <p>{user?.email || (user ? 'Your account is connected.' : 'Sign in to explore your account.')}</p>
         </div>
       </div>
+      {user && expiry && <div className={`session-expiry ${expiry.expired ? 'session-expiry-expired' : ''}`}><InspectorIcon name="clock" size={12} /><span>Access token {expiry.expired ? 'expired' : 'expires in'} <time dateTime={expiry.iso}>{expiry.expired ? '' : expiry.remaining}</time></span></div>}
       <div className="session-request-actions">
         <button type="button" className="inspector-button" disabled={!!busy} onClick={() => onAction('getMe')}><InspectorIcon name="user" size={15} />{busy === 'getMe' ? 'Getting profile…' : 'Get profile'}<kbd>GET</kbd></button>
         <button type="button" className="inspector-button" disabled={!!busy} onClick={() => onAction('refreshToken')}><InspectorIcon name="refresh" size={15} />{busy === 'refreshToken' ? 'Refreshing…' : 'Refresh token'}</button>

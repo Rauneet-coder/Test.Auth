@@ -35,3 +35,17 @@ export function formatDuration(duration) {
   if (!Number.isFinite(value) || value < 0 || duration == null) return '—';
   return value >= 1000 ? `${(value / 1000).toFixed(2)} s` : `${Math.round(value)} ms`;
 }
+
+export function sessionExpiry(expiresAt, now = Date.now()) {
+  if (expiresAt == null || expiresAt === '') return null;
+  const expiry = typeof expiresAt === 'number' ? expiresAt : new Date(expiresAt).getTime();
+  if (!Number.isFinite(expiry) || !Number.isFinite(now)) return null;
+  const seconds = Math.max(0, Math.ceil((expiry - now) / 1000));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return {
+    expired: expiry <= now,
+    iso: new Date(expiry).toISOString(),
+    remaining: hours ? `${hours}h ${minutes}m` : `${minutes}m ${String(seconds % 60).padStart(2, '0')}s`,
+  };
+}

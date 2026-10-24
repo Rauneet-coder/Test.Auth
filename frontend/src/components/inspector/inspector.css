@@ -35,3 +35,6 @@
 .session-confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .inspector-button.inspector-button-danger { background: #824d3c; border-color: #824d3c; color: white; }
 .inspector-button.inspector-button-danger:not(:disabled):hover { background: #6c3b2c; border-color: #6c3b2c; }
+.session-expiry { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #70816c; padding-left: 59px; margin-top: 8px; }
+.session-expiry time { font-variant-numeric: tabular-nums; }
+.session-expiry-expired { color: #a45f42; }

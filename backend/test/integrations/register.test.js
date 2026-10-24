@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
+import bcrypt from "bcrypt";
 import app from "../../src/app.js";
 import Usermodel from "../../src/models/user.model.js";
 

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import "./auth.css";
 import AuthField from "./AuthField";
 import ModeTabs from "./ModeTabs";
@@ -11,15 +11,20 @@ import { validateForm } from "../../lib/formValidation";
 const EMPTY_ERRORS = {};
 const titles = { login: "Welcome back", register: "Create your account", verify: "Check your inbox" };
 
-export default function AuthForm({ mode = "login", onModeChange, fields = {}, onFieldChange, busy = "", notice, errors = EMPTY_ERRORS, onSubmit, onDismissNotice }) {
+export default function AuthForm(props) {
+  return <AuthFormContent key={props.mode || "login"} {...props} />;
+}
+
+function AuthFormContent({ mode = "login", onModeChange, fields = {}, onFieldChange, busy = "", notice, errors = EMPTY_ERRORS, onSubmit, onDismissNotice }) {
   const formId = useId();
   const fieldRefs = useRef({});
   const [clientErrors, setClientErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
   const checkCapsLock = (event) => setCapsLock(!!event.getModifierState?.("CapsLock"));
-  const [editedFields, setEditedFields] = useState({});
-  useEffect(() => { setEditedFields({}); }, [errors]);
+  // A new server response makes its errors relevant again, without an effect.
+  const [edits, setEdits] = useState({ errors, fields: {} });
+  const editedFields = edits.errors === errors ? edits.fields : EMPTY_ERRORS;
   const handleSubmit = (event) => {
     if (busy) { event.preventDefault(); return; }
     const nextErrors = validateForm(mode, fields);
@@ -38,7 +43,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
     if (notice) onDismissNotice?.();
     onFieldChange(name, value);
     setClientErrors((previous) => ({ ...previous, [name]: "" }));
-    setEditedFields((previous) => ({ ...previous, [name]: true }));
+    setEdits((previous) => ({ errors, fields: { ...(previous.errors === errors ? previous.fields : {}), [name]: true } }));
   };
   const ownPending = busy === (mode === "verify" ? "verifyEmail" : mode);
   const pendingLabel = mode === "register" ? "Creating account…" : mode === "verify" ? "Verifying email…" : "Signing in…";

@@ -10,3 +10,18 @@ test("email rejects blank, malformed, and whitespace-padded identifiers", () => 
     assert.notEqual(validation.validateEmail(value), "", value);
   }
 });
+
+test("registration matches backend policy without inventing lowercase requirements", () => {
+  assert.equal(validation.validatePassword("PASSWORD1!", true), "");
+  assert.equal(validation.validatePassword("Password1 ", true), "");
+});
+test("registration detects each missing password requirement", () => {
+  for (const value of ["A1!", "password1!", "Password!", "Password1"]) {
+    assert.notEqual(validation.validatePassword(value, true), "", value);
+  }
+  assert.equal(validation.getPasswordRequirements("Password1!").every(({ met }) => met), true);
+});
+test("login accepts existing passwords without registration policy", () => {
+  assert.equal(validation.validatePassword("old", false), "");
+  assert.notEqual(validation.validatePassword("", false), "");
+});

@@ -60,6 +60,8 @@ describe("POST /api/auth/refresh-token", () => {
         const response = await request(app)
             .post("/api/auth/refresh-token")
             .set("Cookie", ["refreshToken=invalid.corrupted.jwttoken"]);
+
+        expect(response.statusCode).toBe(401);
     });
 
     // ─── Positive Test: Refresh Token & Rotation ─────────────────────────────

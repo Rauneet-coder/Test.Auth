@@ -129,3 +129,9 @@ button.activity-row.activity-row-selected { background: #f0f5e9; box-shadow: ins
 .activity-clear-confirm p { font-size: 10px; line-height: 1.7; margin: 5px 0 0; color: #99826b; }
 .activity-clear-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .activity-clear-actions .inspector-button { min-height: 32px; font-size: 10px; padding: 6px 10px; }
+.activity-request { display: flex; flex-direction: column; min-width: 0; gap: 4px; }
+.activity-action-name { font-size: 9px; color: #98a78a; }
+.activity-response-status { display: inline-flex; align-items: center; gap: 5px; }
+.activity-outcome-label { font-size: 8px; font-weight: 400; }
+.activity-keyboard-hint { margin: 10px 2px 0; font-size: 9px; line-height: 1.7; color: #96a789; display: flex; justify-content: space-between; gap: 10px; }
+.activity-keyboard-hint > span { color: #a3b195; }

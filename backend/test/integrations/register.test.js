@@ -80,6 +80,8 @@ describe("POST /api/auth/register", () => {
 
             expect(response.statusCode).toBe(400);
             expect(response.body).toHaveProperty("errors");
+            expect(Array.isArray(response.body.errors)).toBe(true);
+            expect(response.body.errors.length).toBeGreaterThan(0);
         });
 
         it("should return 400 validation error if email format is invalid", async () => {

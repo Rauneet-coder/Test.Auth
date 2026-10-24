@@ -79,17 +79,18 @@ export const login = (async (req, res) => {
     
     const accessToken = jwt.sign({
         id: user._id,
-    }, config.JWT_SECRET,
-        {
-            expiresIn: "15m"
-        });
+        tokenUse: "access"
+    }, config.JWT_SECRET, {
+        expiresIn: "15m"
+    });
 
     const refreshToken = jwt.sign({
         id: user._id,
-    }, config.JWT_SECRET,
-        {
-            expiresIn: "7d"
-        });
+        jti: crypto.randomUUID(),
+        tokenUse: "refresh"
+    }, config.JWT_SECRET, {
+        expiresIn: "7d"
+    });
 
     // Save session to DB so /refresh-token can validate it later
     await sessionModel.create({
@@ -137,7 +138,11 @@ export const refreshToken = (async (req, res) => {
     let decoded;
     try {
         decoded = jwt.verify(refreshToken, config.JWT_SECRET);
-    } catch (_err) {
+    } catch {
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
+    }
+
+    if (decoded.tokenUse && decoded.tokenUse !== "refresh") {
         return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 
@@ -158,17 +163,18 @@ export const refreshToken = (async (req, res) => {
 
     const newAccessToken = jwt.sign({
         id: user._id,
-    }, config.JWT_SECRET,
-        {
-            expiresIn: "15m"
-        });
+        tokenUse: "access"
+    }, config.JWT_SECRET, {
+        expiresIn: "15m"
+    });
 
     const newRefreshToken = jwt.sign({
         id: user._id,
-    }, config.JWT_SECRET,
-        {
-            expiresIn: "7d"
-        });
+        jti: crypto.randomUUID(),
+        tokenUse: "refresh"
+    }, config.JWT_SECRET, {
+        expiresIn: "7d"
+    });
 
     const newRefreshTokenHash = crypto.createHash("sha256").update(newRefreshToken).digest("hex")
     session.refreshTokenHash = newRefreshTokenHash;
@@ -195,9 +201,14 @@ export const logout = (async (req, res) => {
     let decoded;
     try {
         decoded = jwt.verify(refreshToken, config.JWT_SECRET);
-    } catch (_err) {
+    } catch {
         return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
+
+    if (decoded.tokenUse && decoded.tokenUse !== "refresh") {
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
+    }
+
     const user = await Usermodel.findById(decoded.id);
     if (!user){
         return res.status(404).json({ message: "User not found" });
@@ -228,25 +239,39 @@ export const logoutAll = (async (req, res) => {
         return res.status(400).json({ message: "Refresh token not found" });
     }
 
+    let decoded;
     try {
-        const decoded = jwt.verify(refreshToken, config.JWT_SECRET)
-
-        await sessionModel.updateMany({
-            user: decoded.id,
-            revoked: false
-        }, {
-            revoked: true
-        })
-    } catch (error) {
-        // Token might be invalid/expired, just proceed to clear cookie
+        decoded = jwt.verify(refreshToken, config.JWT_SECRET);
+    } catch {
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 
-    res.clearCookie("refreshToken")
+    if (decoded.tokenUse && decoded.tokenUse !== "refresh") {
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
+    }
+
+    const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+    const activeSession = await sessionModel.findOne({
+        refreshTokenHash,
+        revoked: false
+    });
+
+    if (!activeSession) {
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
+    }
+
+    await sessionModel.updateMany({
+        user: decoded.id,
+        revoked: false
+    }, {
+        revoked: true
+    });
+
+    res.clearCookie("refreshToken");
 
     res.status(200).json({
         message: "Logged out from all devices successfully"
-    })
-
+    });
 });
 
 export async function verifyEmail(req, res) {

@@ -12,6 +12,10 @@ export const authenticate = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, config.JWT_SECRET);
+
+        if (decoded.tokenUse && decoded.tokenUse !== "access") {
+            return res.status(401).json({ message: "Unauthorized: invalid token type" });
+        }
         
         const user = await Usermodel.findById(decoded.id).select("-password");
 
@@ -20,7 +24,7 @@ export const authenticate = async (req, res, next) => {
         }
         req.user = user;
         next();
-    } catch (_error) {
+    } catch {
         return res.status(401).json({ message: "Unauthorized: invalid or expired token" });
     }
 };

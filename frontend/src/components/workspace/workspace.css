@@ -28,3 +28,12 @@
 .workspace-sidebar-foot { display: flex; gap: 9px; align-items: center; margin: 0 -17px; padding: 20px 17px; border-top: 1px solid var(--line); }
 .workspace-mini-avatar { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--accent); background: var(--mint); font-size: 12px; font-weight: 600; }
 .workspace-version { margin-left: auto; font-size: 10px; color: var(--muted); }
+.workspace-header { height: 75px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); background: var(--surface); }
+.workspace-breadcrumb { display: flex; align-items: center; gap: 13px; font-size: 12px; color: var(--muted); }
+.workspace-breadcrumb strong { font-weight: 500; color: var(--ink); }
+.workspace-header-actions { display: flex; align-items: center; gap: 12px; }
+.workspace-environment { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; font-size: 10px; color: var(--muted); }
+.workspace-environment > span { width: 5px; height: 5px; border-radius: 50%; background: #549369; }
+.workspace-icon-button { display: inline-grid; place-items: center; width: 36px; min-height: 36px; border-radius: 7px; border: 0; color: var(--muted); background: transparent; }
+.workspace-icon-button:hover { color: var(--accent); background: var(--mint); }
+.workspace-menu-button { display: none; }

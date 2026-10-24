@@ -96,13 +96,13 @@ export function profileFromResponse(data) {
   return { username: data.user.username, email: data.user.email };
 }
 
-export function fieldErrorsFromResponse(data) {
+export function fieldErrorsFromResponse(data, secrets = []) {
   if (!Array.isArray(data?.errors)) return {};
   const errors = {};
   for (const issue of data.errors) {
     if (["username", "email", "password", "otp"].includes(issue?.field) &&
         typeof issue.message === "string" && !errors[issue.field]) {
-      errors[issue.field] = issue.message;
+      errors[issue.field] = redactData(issue.message, secrets);
     }
   }
   return errors;

@@ -275,6 +275,17 @@ test("display redaction also removes credentials echoed inside ordinary messages
   assert.equal(safe.otp, "[hidden]");
 });
 
+test("password and code field errors keep useful guidance while hiding echoed credentials", async () => {
+  const { fieldErrorsFromResponse } = await import("../src/lib/workspace.js");
+  assert.deepEqual(fieldErrorsFromResponse({ errors: [
+    { field: "password", message: "Password must contain an uppercase letter." },
+    { field: "otp", message: "Code 012345 has expired." },
+  ] }, ["012345"]), {
+    password: "Password must contain an uppercase letter.",
+    otp: "Code [hidden] has expired.",
+  });
+});
+
 test("unverified login navigates to verification while preserving the current guide anchor", async () => {
   const { createElement } = await import("react");
   const { renderToStaticMarkup } = await import("react-dom/server");

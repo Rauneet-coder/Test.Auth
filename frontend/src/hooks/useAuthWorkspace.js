@@ -146,7 +146,7 @@ export default function useAuthWorkspace() {
       return response;
     } catch (error) {
       if (!mounted.current || controller.signal.aborted) return null;
-      setFieldErrors(redactData(fieldErrorsFromResponse(error.response?.data), secrets));
+      setFieldErrors(fieldErrorsFromResponse(error.response?.data, secrets));
       const details = describeRequestError(error, { online: globalThis.navigator?.onLine !== false });
       record(createActivityEntry(requestAction, details.status, performance.now() - start,
         redactData(error.response?.data || { message: details.message }, secrets)));

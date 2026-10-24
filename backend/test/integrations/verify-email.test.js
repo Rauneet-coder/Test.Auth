@@ -71,6 +71,19 @@ describe("POST /api/auth/verify-email", () => {
         expect(response.body).toEqual({ message: "Invalid OTP" });
     });
 
+    
+    // ─── Negative Test 3: Expired OTP ────────────────────────────────────────
+    it("should return 400 if OTP is expired", async () => {
+        const expiredOtp = "654321";
+        const expiredHash = crypto.createHash("sha256").update(expiredOtp).digest("hex");
+        await otpModel.create({
+            user: createdUser._id,
+            email: testUser.email,
+            otpHash: expiredHash,
+            deletedAt: new Date(Date.now() - 5 * 60 * 1000)
+        });
+    });
+
     // ─── Positive Test: Correct OTP ──────────────────────────────────────────
     it("should return 200 and mark user as verified", async () => {
         const response = await request(app)

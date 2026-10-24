@@ -1,10 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
-import mongoose from "mongoose";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import app from "../../src/app.js";
-import connectDB from "../../src/config/database.js";
 import Usermodel from "../../src/models/user.model.js";
 import otpModel from "../../src/models/otp.model.js";
 
@@ -19,8 +17,6 @@ describe("POST /api/auth/verify-email", () => {
     let createdUser;
 
     beforeAll(async () => {
-        await connectDB();
-
         // 1. Clean up old test data
         await Usermodel.deleteOne({ email: testUser.email });
         await otpModel.deleteMany({ email: testUser.email });
@@ -47,7 +43,6 @@ describe("POST /api/auth/verify-email", () => {
     afterAll(async () => {
         await otpModel.deleteMany({ email: testUser.email });
         await Usermodel.deleteOne({ email: testUser.email });
-        await mongoose.connection.close();
     });
 
     // ─── Negative Test 1: Validation Failure (Malformed OTP) ─────────────────

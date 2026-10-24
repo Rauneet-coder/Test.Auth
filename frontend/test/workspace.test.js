@@ -110,3 +110,30 @@ test("rendering the workspace never automatically refreshes or dispatches auth r
     assert.equal(dispatches, 0);
   } finally { api.defaults.adapter = previous; }
 });
+
+test("changing form mode pushes the matching route without duplicate history entries", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { default: useAuthWorkspace } = await import("../src/hooks/useAuthWorkspace.js");
+  const originalLocation = Object.getOwnPropertyDescriptor(globalThis, "location");
+  const originalHistory = Object.getOwnPropertyDescriptor(globalThis, "history");
+  const paths = [];
+  const location = { pathname: "/login" };
+  Object.defineProperty(globalThis, "location", { configurable: true, value: location });
+  Object.defineProperty(globalThis, "history", { configurable: true, value: {
+    pushState: (_state, _title, path) => { paths.push(path); location.pathname = path; },
+  } });
+  let workspace;
+  function Probe() { workspace = useAuthWorkspace(); return null; }
+  try {
+    renderToStaticMarkup(createElement(Probe));
+    workspace.changeMode("register");
+    workspace.changeMode("register");
+    workspace.changeMode("verify");
+    workspace.changeMode("login");
+    assert.deepEqual(paths, ["/register", "/verify", "/login"]);
+  } finally {
+    if (originalLocation) Object.defineProperty(globalThis, "location", originalLocation); else delete globalThis.location;
+    if (originalHistory) Object.defineProperty(globalThis, "history", originalHistory); else delete globalThis.history;
+  }
+});

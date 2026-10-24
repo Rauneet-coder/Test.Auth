@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authApi, describeRequestError } from "../services/api.js";
 import {
-  appendActivity, createActivityEntry, getAction, modeFromPath, payloadForAction,
+  appendActivity, createActivityEntry, getAction, modeFromPath, pathFromMode, payloadForAction,
 } from "../lib/workspace.js";
 
 export default function useAuthWorkspace() {
@@ -28,9 +28,27 @@ export default function useAuthWorkspace() {
   const [expiresAt] = useState(null);
 
   const changeMode = useCallback((next) => {
-    setMode(["login", "register", "verify"].includes(next) ? next : "login");
+    const safeMode = ["login", "register", "verify"].includes(next) ? next : "login";
+    const path = pathFromMode(safeMode);
+    if (globalThis.location && globalThis.location.pathname !== path) {
+      globalThis.history?.pushState(null, "", path);
+    }
+    setMode(safeMode);
     setFieldErrors({});
     setNotice(null);
+  }, []);
+  useEffect(() => {
+    const onPopState = () => {
+      setMode(modeFromPath(globalThis.location?.pathname));
+      setFieldErrors({});
+      setNotice(null);
+    };
+    const path = pathFromMode(modeFromPath(globalThis.location?.pathname));
+    if (globalThis.location && globalThis.location.pathname !== path) {
+      globalThis.history?.replaceState(null, "", path);
+    }
+    globalThis.addEventListener?.("popstate", onPopState);
+    return () => globalThis.removeEventListener?.("popstate", onPopState);
   }, []);
   const updateField = useCallback((name, value) => {
     if (!["username", "email", "password", "otp"].includes(name)) return;

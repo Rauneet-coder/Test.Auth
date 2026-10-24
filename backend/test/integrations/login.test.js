@@ -53,6 +53,9 @@ describe("POST /api/auth/login", () => {
                 email: verifiedUser.email,
                 password: "WrongPassword999!"
             });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({ message: "Invalid password" });
     });
 
     it("should return 400 if email or password are missing", async () => {

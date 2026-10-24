@@ -58,6 +58,16 @@ describe("POST /api/auth/login", () => {
         expect(response.body).toEqual({ message: "Invalid password" });
     });
 
+    // ─── P0: Login before email verification ─────────────────────────────────
+    it("should reject login before email verification", async () => {
+        const response = await request(app)
+            .post("/api/auth/login")
+            .send({
+                email: unverifiedUser.email,
+                password: unverifiedUser.password
+            });
+    });
+
     it("should return 400 if email or password are missing", async () => {
         const response = await request(app)
             .post("/api/auth/login")

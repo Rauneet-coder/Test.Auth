@@ -34,6 +34,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
     else event.preventDefault();
   };
   const updateField = (name, value) => {
+    if (notice) onDismissNotice?.();
     onFieldChange(name, value);
     setClientErrors((previous) => ({ ...previous, [name]: "" }));
     setEditedFields((previous) => ({ ...previous, [name]: true }));

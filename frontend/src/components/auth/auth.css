@@ -42,3 +42,6 @@
 .auth-otp-entry .auth-otp-input { position:absolute; inset:0; height:100%; opacity:0; cursor:text; }
 .auth-otp-entry:focus-within .auth-otp-active { border-color:var(--auth-primary); box-shadow:0 0 0 3px #235c461c; background:#f7fbf8; }
 .auth-otp-invalid .auth-otp-slot { border-color:#bf4e54; }
+
+.auth-label-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.auth-clear-code { color:var(--auth-primary); background:transparent; border:0; padding:0 3px; min-height:28px; font:inherit; font-size:12px; font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }

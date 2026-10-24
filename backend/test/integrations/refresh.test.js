@@ -12,22 +12,29 @@ describe("POST /api/auth/refresh-token", () => {
         password: "SecurePassword123!"
     };
 
-    let initialCookies;
+    let userDoc;
 
     beforeAll(async () => {
-        // 1. Clean up old test data
         await Usermodel.deleteOne({ email: testUser.email });
 
-        // 2. Seed a verified user directly into DB
         const hashedPassword = await bcrypt.hash(testUser.password, 10);
-        const user = await Usermodel.create({
+        userDoc = await Usermodel.create({
             username: testUser.username,
             email: testUser.email,
             password: hashedPassword,
             verified: true
         });
+    });
 
-        // 3. Log in to get initial refresh token cookie
+    afterAll(async () => {
+        if (userDoc) {
+            await sessionModel.deleteMany({ user: userDoc._id });
+            await Usermodel.deleteOne({ _id: userDoc._id });
+        }
+    });
+
+    // Helper to get fresh login cookies for isolated, self-contained tests
+    async function getFreshLoginCookies() {
         const loginRes = await request(app)
             .post("/api/auth/login")
             .set("User-Agent", "supertest-agent")
@@ -35,17 +42,11 @@ describe("POST /api/auth/refresh-token", () => {
                 email: testUser.email,
                 password: testUser.password
             });
-
-        initialCookies = loginRes.headers["set-cookie"];
-    });
-
-    afterAll(async () => {
-        const user = await Usermodel.findOne({ email: testUser.email });
-        if (user) {
-            await sessionModel.deleteMany({ user: user._id });
-            await Usermodel.deleteOne({ _id: user._id });
-        }
-    });
+        return {
+            cookies: loginRes.headers["set-cookie"],
+            accessToken: loginRes.body.accessToken
+        };
+    }
 
     // ─── Negative Test 1: No Cookie ──────────────────────────────────────────
     it("should return 401 if refresh token cookie is missing", async () => {
@@ -65,11 +66,21 @@ describe("POST /api/auth/refresh-token", () => {
         expect(response.body).toEqual({ message: "Invalid or expired refresh token" });
     });
 
-    // ─── Positive Test: Refresh Token & Rotation ─────────────────────────────
-    let rotatedCookies;
-    it("should return 200 and issue a new access token and rotated refresh token", async () => {
-        // Wait 1 second so the JWT `iat` (issued-at) second changes, generating a new token hash
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+    // ─── Negative Test 3: Token Type Enforcement (tokenUse claim) ───────────
+    it("should return 401 if an access token is passed as a refresh token", async () => {
+        const { accessToken } = await getFreshLoginCookies();
+
+        const response = await request(app)
+            .post("/api/auth/refresh-token")
+            .set("Cookie", [`refreshToken=${accessToken}`]);
+
+        expect(response.statusCode).toBe(401);
+        expect(response.body).toEqual({ message: "Invalid or expired refresh token" });
+    });
+
+    // ─── Positive Test: Refresh Token & Rotation (Without Artificial Delays) ─
+    it("should return 200 and issue a new access token and uniquely rotated refresh token", async () => {
+        const { cookies: initialCookies } = await getFreshLoginCookies();
 
         const response = await request(app)
             .post("/api/auth/refresh-token")
@@ -79,31 +90,50 @@ describe("POST /api/auth/refresh-token", () => {
         expect(response.body).toHaveProperty("accessToken");
         expect(response.body.message).toBe("Access token refreshed successfully");
 
-        // Verify that a new refresh token cookie was issued (Token Rotation)
-        rotatedCookies = response.headers["set-cookie"];
+        const rotatedCookies = response.headers["set-cookie"];
         expect(rotatedCookies).toBeDefined();
         expect(rotatedCookies[0]).toContain("refreshToken=");
+
+        // Verify the newly rotated token is cryptographically distinct from the original
+        expect(rotatedCookies[0]).not.toBe(initialCookies[0]);
     });
 
-    // ─── Security Test: Token Reuse Prevention ───────────────────────────────
-    it("should return 401 if trying to reuse the old, already-rotated refresh token", async () => {
-        // Because the initial refresh token was rotated in the previous test,
-        // sending it again should be rejected.
-        const response = await request(app)
+    // ─── Security Test: Token Reuse Prevention (Self-contained) ──────────────
+    it("should return 401 if trying to reuse an old, already-rotated refresh token", async () => {
+        const { cookies: initialCookies } = await getFreshLoginCookies();
+
+        // 1. Rotate the initial token once
+        const rotateRes = await request(app)
+            .post("/api/auth/refresh-token")
+            .set("Cookie", initialCookies);
+        expect(rotateRes.statusCode).toBe(200);
+
+        // 2. Attempt to reuse the superseded initial token
+        const reuseRes = await request(app)
             .post("/api/auth/refresh-token")
             .set("Cookie", initialCookies);
 
-        expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Invalid or expired refresh token" });
+        expect(reuseRes.statusCode).toBe(401);
+        expect(reuseRes.body).toEqual({ message: "Invalid or expired refresh token" });
     });
 
-    // ─── Positive Test 2: Using the New Rotated Token ────────────────────────
+    // ─── Positive Test 2: Using the New Rotated Token (Self-contained) ───────
     it("should return 200 when using the newly rotated refresh token", async () => {
-        const response = await request(app)
+        const { cookies: initialCookies } = await getFreshLoginCookies();
+
+        // 1. Rotate token
+        const rotateRes = await request(app)
+            .post("/api/auth/refresh-token")
+            .set("Cookie", initialCookies);
+        expect(rotateRes.statusCode).toBe(200);
+        const rotatedCookies = rotateRes.headers["set-cookie"];
+
+        // 2. Use rotated token for another refresh
+        const secondRefreshRes = await request(app)
             .post("/api/auth/refresh-token")
             .set("Cookie", rotatedCookies);
 
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toHaveProperty("accessToken");
+        expect(secondRefreshRes.statusCode).toBe(200);
+        expect(secondRefreshRes.body).toHaveProperty("accessToken");
     });
 });

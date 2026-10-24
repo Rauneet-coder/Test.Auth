@@ -56,6 +56,28 @@ describe("GET /api/auth/me", () => {
         expect(response.body).toEqual({ message: "Unauthorized: invalid or expired token" });
     });
 
+    it("should return 401 if a refresh token is supplied instead of an access token", async () => {
+        // Log in to acquire a refreshToken
+        const loginRes = await request(app)
+            .post("/api/auth/login")
+            .set("User-Agent", "supertest-agent")
+            .send({
+                email: testUser.email,
+                password: testUser.password
+            });
+
+        const setCookie = loginRes.headers["set-cookie"]?.[0] || "";
+        const refreshTokenMatch = setCookie.match(/refreshToken=([^;]+)/);
+        const refreshToken = refreshTokenMatch ? refreshTokenMatch[1] : "";
+
+        const response = await request(app)
+            .get("/api/auth/me")
+            .set("Authorization", `Bearer ${refreshToken}`);
+
+        expect(response.statusCode).toBe(401);
+        expect(response.body).toEqual({ message: "Unauthorized: invalid token type" });
+    });
+
     it("should return 200 and user profile with valid Bearer token", async () => {
         const response = await request(app)
             .get("/api/auth/me")

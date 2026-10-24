@@ -90,3 +90,58 @@ test('history counts derive from entries and keep network errors inside the erro
   assert.deepEqual(requestCounts([{ status: 201 }, { status: 401 }, { status: 'ERR' }, { status: undefined }]), { total: 4, success: 1, error: 2, network: 1 });
   assert.deepEqual(requestCounts([]), { total: 0, success: 0, error: 0, network: 0 });
 });
+
+test('clipboard fallback removes its temporary field and restores focus after copy denial', async () => {
+  let selected = false;
+  let removed = false;
+  let restored = false;
+  let appended;
+  const field = { style: {}, setAttribute() {}, select() { selected = true; }, remove() { removed = true; } };
+  const context = {
+    navigator: { clipboard: { writeText: async () => { throw Error('Denied'); } } },
+    document: { body: { appendChild(node) { appended = node; } }, activeElement: { focus() { restored = true; } }, createElement() { return field; }, execCommand() { return false; } },
+  };
+  assert.equal(await copyResponse({ refreshToken: 'never-copy' }, context), false);
+  assert.equal(JSON.parse(appended.value).refreshToken, '[hidden]');
+  assert.equal(selected, true);
+  assert.equal(removed, true);
+  assert.equal(restored, true);
+});
+
+test('downloaded JSON is redacted and its temporary URL is released', async () => {
+  let content;
+  let clicked = false;
+  let removed = false;
+  let revoked;
+  let scheduleCleanup;
+  const link = { click() { clicked = true; }, remove() { removed = true; } };
+  const context = {
+    Blob: class { constructor(parts, options) { content = parts.join(''); assert.match(options.type, /^application\/json/); } },
+    URL: { createObjectURL() { return 'blob:test'; }, revokeObjectURL(url) { revoked = url; } },
+    document: { body: { appendChild() {} }, createElement() { return link; } },
+    setTimeout(callback) { scheduleCleanup = callback; },
+  };
+  assert.equal(downloadResponse({ action: 'login', data: { accessToken: 'secret', message: 'Welcome' } }, context), true);
+  assert.equal(JSON.parse(content).accessToken, '[hidden]');
+  assert.equal(link.download, 'aith-login.json');
+  assert.equal(clicked, true);
+  assert.equal(removed, true);
+  assert.equal(revoked, undefined);
+  scheduleCleanup();
+  assert.equal(revoked, 'blob:test');
+});
+
+test('malformed expiry and unusual status values cannot crash the inspector', () => {
+  assert.equal(sessionExpiry(Number.MAX_VALUE, 0), null);
+  assert.equal(sessionExpiry(Number.NaN), null);
+  assert.equal(statusLabel('constructor'), 'Unknown status');
+});
+
+test('redaction does not mutate the original response or mistake shared values for cycles', () => {
+  const shared = { email: 'example@test.dev', password: 'keep-in-original-only' };
+  const original = { first: shared, second: shared };
+  const output = JSON.parse(responseJson(original));
+  assert.deepEqual(output.first, output.second);
+  assert.equal(output.first.password, '[hidden]');
+  assert.equal(shared.password, 'keep-in-original-only');
+});

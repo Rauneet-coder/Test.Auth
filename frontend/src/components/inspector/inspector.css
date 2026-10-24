@@ -58,7 +58,7 @@
 .response-waiting { display: inline-flex; align-items: center; gap: 7px; font-size: 9px; color: #9ba88e; }
 .response-waiting > span { width: 4px; height: 4px; background: #91a37e; border-radius: 50%; }
 .response-card-footer { border-top: 1px solid #e9eee3; padding: 11px 24px; display: flex; align-items: center; gap: 6px; font-size: 9px; color: #8c9b80; }
-.response-card-footer > span:last-child { margin-left: auto; font-size: 9px; font-family: monospace; }
+.response-card-footer > .response-format-label { margin-left: auto; font-size: 9px; font-family: monospace; }
 .response-live-dot { width: 5px; height: 5px; background: #9fb58c; border-radius: 50%; }
 .response-live-dot-busy { background: #bc9857; }
 .response-code-inset { margin-top: 18px; border: 1px solid #26392c; border-radius: 9px; background: #182820; overflow: hidden; }
@@ -215,3 +215,7 @@ button.activity-row.activity-row-selected { background: #f0f5e9; box-shadow: ins
 @media (prefers-reduced-motion: reduce) {
   .inspector-card *, .activity-panel * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+.session-identity p, .session-request-footer p, .session-expiry, .response-redaction-note, .response-duration, .response-waiting, .response-card-footer, .response-empty p, .response-live-label, .response-metadata dt, .activity-visit-label, .activity-action-name, .activity-duration, .activity-row time, .activity-summary, .activity-summary .activity-visible-count, .activity-empty-state p, .activity-keyboard-hint, .activity-keyboard-hint > span, .activity-filter, .activity-search input::placeholder { color: #68775f; }
+.inspector-button.response-tool { color: #58724a; }
+.session-expiry-expired { color: #a45f42; }

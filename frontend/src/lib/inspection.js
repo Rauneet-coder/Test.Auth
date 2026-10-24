@@ -27,7 +27,7 @@ export function statusKind(status) {
 export function statusLabel(status) {
   if (status === 'ERR') return 'Network error';
   const labels = { 200: 'OK', 201: 'Created', 204: 'No content', 400: 'Bad request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not found', 409: 'Conflict', 422: 'Validation error', 429: 'Too many requests', 500: 'Server error' };
-  return labels[status] || (statusKind(status) === 'success' ? 'Completed' : statusKind(status) === 'error' ? 'Request failed' : 'Unknown status');
+  return labels[Number(status)] || (statusKind(status) === 'success' ? 'Completed' : statusKind(status) === 'error' ? 'Request failed' : 'Unknown status');
 }
 
 export function formatDuration(duration) {
@@ -39,7 +39,7 @@ export function formatDuration(duration) {
 export function sessionExpiry(expiresAt, now = Date.now()) {
   if (expiresAt == null || expiresAt === '') return null;
   const expiry = typeof expiresAt === 'number' ? expiresAt : new Date(expiresAt).getTime();
-  if (!Number.isFinite(expiry) || !Number.isFinite(now)) return null;
+  if (!Number.isFinite(expiry) || !Number.isFinite(now) || !Number.isFinite(new Date(expiry).getTime())) return null;
   const seconds = Math.max(0, Math.ceil((expiry - now) / 1000));
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);

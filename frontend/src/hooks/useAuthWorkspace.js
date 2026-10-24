@@ -24,8 +24,18 @@ export default function useAuthWorkspace() {
   const [result, setResult] = useState(null);
   const [user, setUser] = useState(null);
   const [sessionStatus, setSessionStatus] = useState("signed-out");
-  const [online] = useState(() => globalThis.navigator?.onLine !== false);
+  const [online, setOnline] = useState(() => globalThis.navigator?.onLine !== false);
   const [expiresAt] = useState(null);
+  useEffect(() => {
+    const updateConnection = () => setOnline(globalThis.navigator?.onLine !== false);
+    globalThis.addEventListener?.("online", updateConnection);
+    globalThis.addEventListener?.("offline", updateConnection);
+    updateConnection();
+    return () => {
+      globalThis.removeEventListener?.("online", updateConnection);
+      globalThis.removeEventListener?.("offline", updateConnection);
+    };
+  }, []);
 
   const changeMode = useCallback((next) => {
     const safeMode = ["login", "register", "verify"].includes(next) ? next : "login";
@@ -67,6 +77,10 @@ export default function useAuthWorkspace() {
   const run = useCallback(async (action, payload) => {
     if (inFlight.current) return null;
     getAction(action);
+    if (globalThis.navigator?.onLine === false) {
+      setNotice({ type: "error", message: "You are offline. Reconnect, then try your request again." });
+      return null;
+    }
     inFlight.current = true;
     const controller = new AbortController();
     requestController.current = controller;

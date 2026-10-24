@@ -222,3 +222,27 @@ test("server validation issues map only to known fields and retain the first use
   ] }), { email: "Enter a valid email.", password: "Use an uppercase letter." });
   assert.deepEqual(fieldErrorsFromResponse({ errors: "unexpected" }), {});
 });
+
+test("offline requests are stopped before transport without inventing API activity", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { default: useAuthWorkspace } = await import("../src/hooks/useAuthWorkspace.js");
+  const { default: api } = await import("../src/services/api.js");
+  const previous = api.defaults.adapter;
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+  let dispatches = 0;
+  Object.defineProperty(globalThis, "navigator", { configurable: true, value: { onLine: false } });
+  api.defaults.adapter = async () => { dispatches++; throw new Error("Should not dispatch"); };
+  let workspace;
+  function Probe() { workspace = useAuthWorkspace(); return null; }
+  try {
+    renderToStaticMarkup(createElement(Probe));
+    assert.equal(workspace.online, false);
+    assert.equal(await workspace.run("refreshToken"), null);
+    assert.equal(dispatches, 0);
+    assert.equal(workspace.history.length, 0);
+  } finally {
+    api.defaults.adapter = previous;
+    if (descriptor) Object.defineProperty(globalThis, "navigator", descriptor); else delete globalThis.navigator;
+  }
+});

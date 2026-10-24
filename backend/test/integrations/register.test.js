@@ -73,5 +73,13 @@ describe("POST /api/auth/register", () => {
 
     // ─── P0: Invalid registration data (Validation errors) ───────────────────
     describe("Validation Errors", () => {
+        it("should return 400 validation error if required fields are missing", async () => {
+            const response = await request(app)
+                .post("/api/auth/register")
+                .send({});
+
+            expect(response.statusCode).toBe(400);
+            expect(response.body).toHaveProperty("errors");
+        });
     });
 });

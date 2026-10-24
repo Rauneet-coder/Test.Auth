@@ -1,14 +1,17 @@
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import "./auth.css";
 import AuthField from "./AuthField";
 import { validateForm } from "../../lib/formValidation";
 
+const EMPTY_ERRORS = {};
 const titles = { login: "Welcome back", register: "Create your account", verify: "Check your inbox" };
 
-export default function AuthForm({ mode = "login", onModeChange, fields = {}, onFieldChange, busy = "", notice, errors = {}, onSubmit, onDismissNotice }) {
+export default function AuthForm({ mode = "login", onModeChange, fields = {}, onFieldChange, busy = "", notice, errors = EMPTY_ERRORS, onSubmit, onDismissNotice }) {
   const formId = useId();
   const fieldRefs = useRef({});
   const [clientErrors, setClientErrors] = useState({});
+  const [editedFields, setEditedFields] = useState({});
+  useEffect(() => { setEditedFields({}); }, [errors]);
   const handleSubmit = (event) => {
     const nextErrors = validateForm(mode, fields);
     setClientErrors(nextErrors);
@@ -24,10 +27,11 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
   const field = (name, label, type = "text") => (
     <AuthField key={name} id={`${formId}-${name}`} name={name} label={label} type={type}
       inputRef={(element) => { fieldRefs.current[name] = element; }}
-      error={clientErrors[name]}
+      error={clientErrors[name] || (!editedFields[name] && errors[name]) || undefined}
       value={fields[name] || ""} onChange={(event) => {
         onFieldChange(name, event.target.value);
         setClientErrors((previous) => ({ ...previous, [name]: "" }));
+        setEditedFields((previous) => ({ ...previous, [name]: true }));
       }} required
       autoComplete={name === "password" ? (mode === "register" ? "new-password" : "current-password") : name === "otp" ? "one-time-code" : name}
       autoCapitalize="none" spellCheck={false}

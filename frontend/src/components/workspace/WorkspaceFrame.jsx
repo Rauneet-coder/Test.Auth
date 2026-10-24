@@ -10,7 +10,8 @@ const titles = { authentication: 'Authentication', activity: 'Request activity',
 export default function WorkspaceFrame({ view, onNavigate, requestCount, onStart, children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => { try { return window.localStorage.getItem('aith.sidebar.collapsed') === '1'; } catch { return false; } });
+  useEffect(() => { try { window.localStorage.setItem('aith.sidebar.collapsed', collapsed ? '1' : '0'); } catch { /* The layout remains usable when storage is unavailable. */ } }, [collapsed]);
   useEffect(() => {
     const handleKey = event => {
       if (event.target instanceof HTMLElement && (event.target.closest('input, textarea, select, [contenteditable="true"]') || event.target.closest('dialog'))) return;

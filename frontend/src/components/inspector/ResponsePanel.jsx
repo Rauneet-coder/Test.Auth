@@ -42,7 +42,7 @@ export default function ResponsePanel({ result, busy, onClear }) {
           <span className="response-waiting"><span />{busy ? 'Request in progress…' : 'Waiting for your first request'}</span>
         </div>
       )}
-      <div className="response-card-footer"><span className={`response-live-dot ${busy ? 'response-live-dot-busy' : ''}`} />{busy ? 'Request in progress…' : result ? 'Selected response' : 'Ready when you are'}<span>JSON</span></div>
+      <div className="response-card-footer" role="status" aria-atomic="true"><span className={`response-live-dot ${busy ? 'response-live-dot-busy' : ''}`} />{busy ? 'Request in progress…' : result ? 'Selected response' : 'Ready when you are'}<span>JSON</span>{result && !busy && <span className="inspector-sr-only">{details.method} {details.path}, {result.status} {statusLabel(result.status)}, {formatDuration(result.duration)}.</span>}</div>
     </section>
   );
 }

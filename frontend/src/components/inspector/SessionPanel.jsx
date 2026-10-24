@@ -1,5 +1,5 @@
-import { useEffect, useId, useState } from 'react';
-import { sessionExpiry } from '../../lib/inspection';
+import { useEffect, useId, useRef, useState } from 'react';
+import { requestDetails, sessionExpiry } from '../../lib/inspection';
 import InspectorIcon from './InspectorIcon';
 import './inspector.css';
 
@@ -7,6 +7,8 @@ export default function SessionPanel({ user, busy, onAction, expiresAt }) {
   const titleId = useId();
   const confirmId = useId();
   const [confirmAll, setConfirmAll] = useState(false);
+  const allDevicesRef = useRef(null);
+  function closeConfirmation() { setConfirmAll(false); allDevicesRef.current?.focus(); }
   const [now, setNow] = useState(Date.now);
   const expiry = sessionExpiry(expiresAt, now);
   useEffect(() => {
@@ -38,19 +40,20 @@ export default function SessionPanel({ user, busy, onAction, expiresAt }) {
         <p>Try requests even when signed out.</p>
         <div className="session-signout-actions">
           <button type="button" disabled={!!busy} onClick={() => onAction('logout')}>{busy === 'logout' ? 'Signing out…' : 'Sign out'}</button>
-          <button type="button" disabled={!!busy} onClick={() => setConfirmAll(true)}>{busy === 'logoutAll' ? 'Signing out…' : 'All devices'}</button>
+          <button type="button" disabled={!!busy} ref={allDevicesRef} onClick={() => setConfirmAll(true)}>{busy === 'logoutAll' ? 'Signing out…' : 'All devices'}</button>
         </div>
       </div>
       {confirmAll && (
-        <div className="session-confirm" role="alertdialog" aria-modal="false" aria-labelledby={`${confirmId}-title`} aria-describedby={`${confirmId}-description`} onKeyDown={(event) => { if (event.key === 'Escape') setConfirmAll(false); }}>
+        <div className="session-confirm" role="alertdialog" aria-modal="false" aria-labelledby={`${confirmId}-title`} aria-describedby={`${confirmId}-description`} onKeyDown={(event) => { if (event.key === 'Escape') closeConfirmation(); }}>
           <h3 id={`${confirmId}-title`}>Sign out on all devices?</h3>
           <p id={`${confirmId}-description`}>This sends a request to end all sessions for your account.</p>
           <div className="session-confirm-actions">
-            <button type="button" className="inspector-button" autoFocus disabled={!!busy} onClick={() => setConfirmAll(false)}>Keep sessions</button>
-            <button type="button" className="inspector-button inspector-button-danger" disabled={!!busy} onClick={() => { setConfirmAll(false); onAction('logoutAll'); }}>Sign out all devices</button>
+            <button type="button" className="inspector-button" autoFocus disabled={!!busy} onClick={closeConfirmation}>Keep sessions</button>
+            <button type="button" className="inspector-button inspector-button-danger" disabled={!!busy} onClick={() => { closeConfirmation(); onAction('logoutAll'); }}>Sign out all devices</button>
           </div>
         </div>
       )}
+      <span className="inspector-sr-only" role="status">{busy ? `${requestDetails({ action: busy }).label} request in progress.` : user ? 'Session signed in.' : 'Session signed out.'}</span>
     </section>
   );
 }

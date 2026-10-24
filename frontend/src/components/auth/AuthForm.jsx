@@ -3,6 +3,7 @@ import "./auth.css";
 import AuthField from "./AuthField";
 import ModeTabs from "./ModeTabs";
 import PasswordChecklist from "./PasswordChecklist";
+import OtpField from "./OtpField";
 import { validateForm } from "../../lib/formValidation";
 
 const EMPTY_ERRORS = {};
@@ -29,16 +30,17 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
     if (onSubmit) onSubmit(event);
     else event.preventDefault();
   };
+  const updateField = (name, value) => {
+    onFieldChange(name, value);
+    setClientErrors((previous) => ({ ...previous, [name]: "" }));
+    setEditedFields((previous) => ({ ...previous, [name]: true }));
+  };
   const field = (name, label, type = "text") => (
     <AuthField key={name} id={`${formId}-${name}`} name={name} label={label} type={name === "password" && showPassword ? "text" : type}
       trailing={name === "password" && <button className="auth-password-toggle" type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} disabled={!!busy} onClick={() => setShowPassword((previous) => !previous)}>{showPassword ? "Hide" : "Show"}</button>}
       inputRef={(element) => { fieldRefs.current[name] = element; }}
       error={clientErrors[name] || (!editedFields[name] && errors[name]) || undefined}
-      value={fields[name] || ""} onChange={(event) => {
-        onFieldChange(name, event.target.value);
-        setClientErrors((previous) => ({ ...previous, [name]: "" }));
-        setEditedFields((previous) => ({ ...previous, [name]: true }));
-      }} required
+      value={fields[name] || ""} onChange={(event) => updateField(name, event.target.value)} required
       autoComplete={name === "password" ? (mode === "register" ? "new-password" : "current-password") : name === "otp" ? "one-time-code" : name}
       autoCapitalize="none" spellCheck={false}
       onKeyDown={name === "password" ? checkCapsLock : undefined}
@@ -60,7 +62,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         {mode === "register" && field("username", "Username")}
         {field("email", "Email address", "email")}
-        {mode === "verify" ? field("otp", "Verification code") : field("password", "Password", "password")}
+        {mode === "verify" ? <OtpField id={`${formId}-otp`} value={fields.otp || ""} onChange={(value) => updateField("otp", value)} inputRef={(element) => { fieldRefs.current.otp = element; }} error={clientErrors.otp || (!editedFields.otp && errors.otp) || undefined} disabled={!!busy} /> : field("password", "Password", "password")}
         {mode !== "verify" && capsLock && <p className="auth-caps-hint" role="status">Caps Lock is on. Passwords are case-sensitive.</p>}
         {mode === "register" && <PasswordChecklist value={fields.password || ""} />}
         <button className="auth-submit" type="submit">{mode === "register" ? "Create account" : mode === "verify" ? "Verify email" : "Sign in"}</button>

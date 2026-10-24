@@ -34,3 +34,15 @@ export function normalizeOtp(value = "") {
 export function validateOtp(value = "") {
   return /^[0-9]{6}$/.test(value) ? "" : "Enter all 6 digits from your verification email.";
 }
+
+export function validateForm(mode, fields = {}) {
+  const errors = {};
+  const checks = { email: validateEmail(fields.email) };
+  if (mode === "register") checks.username = validateUsername(fields.username);
+  if (mode === "verify") checks.otp = validateOtp(fields.otp);
+  else checks.password = validatePassword(fields.password, mode === "register");
+  for (const [name, message] of Object.entries(checks)) {
+    if (message) errors[name] = message;
+  }
+  return errors;
+}

@@ -48,3 +48,15 @@ test("OTP requires exactly six ASCII digits", () => {
     assert.notEqual(validation.validateOtp(value), "", value);
   }
 });
+
+test("each mode requires only the fields used by its endpoint", () => {
+  assert.deepEqual(validation.validateForm("login", { email: "a@example.com", password: "old" }), {});
+  assert.deepEqual(validation.validateForm("verify", { email: "a@example.com", otp: "012345" }), {});
+  assert.deepEqual(validation.validateForm("register", { username: "Alex", email: "a@example.com", password: "PASSWORD1!" }), {});
+});
+test("registration reports all invalid fields but does not require OTP", () => {
+  assert.deepEqual(Object.keys(validation.validateForm("register", {})).sort(), ["email", "password", "username"]);
+});
+test("verification still requires an email when a valid code is present", () => {
+  assert.deepEqual(Object.keys(validation.validateForm("verify", { otp: "123456" })), ["email"]);
+});

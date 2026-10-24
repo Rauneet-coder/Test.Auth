@@ -8,6 +8,8 @@ import { authRateLimiter } from "../middlewares/rateLimiter.js";
 
 const authRouter = Router();
 
+authRouter.use(authRateLimiter);
+
 /**
  * POST /api/auth/register
  * Body: { username, email, password }

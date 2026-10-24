@@ -16,36 +16,45 @@ api.interceptors.request.use((config) => {
   if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
   return config;
 });
+export function describeRequestError(error, { online = true } = {}) {
+  const status = error?.response?.status;
+  const body = error?.response?.data;
+  const isRecord = body && typeof body === "object" && !Array.isArray(body);
+  const issues = Array.isArray(body?.errors)
+    ? body.errors.filter((item) => typeof item?.message === "string").map((item) => item.message).join(" ")
+    : "";
+  let kind = "server";
+  let message = issues || (isRecord && typeof body.message === "string" ? body.message : "");
+  if (error?.code === "INVALID_RESPONSE") {
+    kind = "invalid-response";
+    message = error.message;
+  } else if (!online) {
+    kind = "offline";
+    message = "You are offline. Reconnect, then try your request again.";
+  } else if (error?.code === "ECONNABORTED" || error?.code === "ETIMEDOUT") {
+    kind = "timeout";
+    message = "The request took too long. Check your connection and try again.";
+  } else if (error?.code === "ERR_CANCELED") {
+    kind = "cancelled";
+    message = "The request was cancelled.";
+  } else if (!status) {
+    kind = "connection";
+    message = "Could not reach the API. Check the backend connection and try again.";
+  } else if (!message) {
+    message = `Request failed (${status}). Please try again.`;
+  }
+  return { kind, message, status: status || "ERR" };
+}
+
 api.interceptors.response.use(
-  (response) => {
-    if (!response.data || typeof response.data !== "object") {
-      const error = new Error(
-        "Expected a JSON response. Check that the Aith backend is running on port 3000.",
-      );
-      error.response = {
-        status: response.status,
-        data: { message: error.message },
-      };
-      return Promise.reject(error);
-    }
-    return response;
-  },
+  (response) => response,
   (error) => {
-    if (error.response && typeof error.response.data !== "object") {
-      error.response.data = {
-        message:
-          "Expected a JSON response. Check that the Aith backend is running on port 3000.",
-      };
-    }
-    error.message =
-      error.response?.data?.errors?.map((item) => item.message).join(" ") ||
-      error.response?.data?.message ||
-      (error.response
-        ? `Request failed (${error.response.status}).`
-        : "Could not reach the API. Check that your backend is running on port 3000.");
+    const details = describeRequestError(error, { online: globalThis.navigator?.onLine !== false });
+    error.message = details.message;
     return Promise.reject(error);
   },
 );
+
 export function assertAuthResponse(action, response) {
   getAction(action);
   const data = response?.data;

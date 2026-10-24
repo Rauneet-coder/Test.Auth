@@ -1,16 +1,14 @@
 import { useId } from "react";
 import "./auth.css";
+import AuthField from "./AuthField";
 
 const titles = { login: "Welcome back", register: "Create your account", verify: "Check your inbox" };
 
 export default function AuthForm({ mode = "login", onModeChange, fields = {}, onFieldChange, busy = "", notice, errors = {}, onSubmit, onDismissNotice }) {
   const formId = useId();
   const field = (name, label, type = "text") => (
-    <div className="auth-field" key={name}>
-      <label className="auth-label" htmlFor={`${formId}-${name}`}>{label}</label>
-      <input className="auth-input" id={`${formId}-${name}`} name={name} type={type}
-        value={fields[name] || ""} onChange={(event) => onFieldChange(name, event.target.value)} required />
-    </div>
+    <AuthField key={name} id={`${formId}-${name}`} name={name} label={label} type={type}
+      value={fields[name] || ""} onChange={(event) => onFieldChange(name, event.target.value)} required />
   );
   return (
     <section className="auth-form-panel" aria-labelledby={`${formId}-title`}>

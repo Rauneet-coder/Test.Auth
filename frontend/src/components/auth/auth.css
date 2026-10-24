@@ -11,3 +11,9 @@
 .auth-input::placeholder { color:#78837d; }
 .auth-submit { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; min-height:48px; border:1px solid var(--auth-primary); border-radius:9px; padding:12px 18px; background:var(--auth-primary); color:#fff; font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
 .auth-submit:hover { background:#194b38; }
+
+.auth-input-wrap { position:relative; }
+.auth-field-hint,.auth-field-error { margin:0; font-size:12px; line-height:1.55; }
+.auth-field-hint { color:var(--auth-muted); }
+.auth-field-error { color:#a12c33; }
+.auth-field-invalid .auth-input { border-color:#bf4e54; background:#fffafa; }

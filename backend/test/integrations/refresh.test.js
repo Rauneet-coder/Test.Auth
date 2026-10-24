@@ -1,9 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import app from "../../src/app.js";
-import connectDB from "../../src/config/database.js";
 import Usermodel from "../../src/models/user.model.js";
 import sessionModel from "../../src/models/session.model.js";
 
@@ -17,8 +15,6 @@ describe("POST /api/auth/refresh-token", () => {
     let initialCookies;
 
     beforeAll(async () => {
-        await connectDB();
-
         // 1. Clean up old test data
         await Usermodel.deleteOne({ email: testUser.email });
 
@@ -49,7 +45,6 @@ describe("POST /api/auth/refresh-token", () => {
             await sessionModel.deleteMany({ user: user._id });
             await Usermodel.deleteOne({ _id: user._id });
         }
-        await mongoose.connection.close();
     });
 
     // ─── Negative Test 1: No Cookie ──────────────────────────────────────────

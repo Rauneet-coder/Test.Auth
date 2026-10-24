@@ -1,9 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import app from "../../src/app.js";
-import connectDB from "../../src/config/database.js";
 import Usermodel from "../../src/models/user.model.js";
 
 describe("GET /api/auth/me", () => {
@@ -16,8 +14,6 @@ describe("GET /api/auth/me", () => {
     let validAccessToken;
 
     beforeAll(async () => {
-        await connectDB();
-
         // Clean up & seed verified user
         await Usermodel.deleteOne({ email: testUser.email });
         const hashedPassword = await bcrypt.hash(testUser.password, 10);
@@ -42,7 +38,6 @@ describe("GET /api/auth/me", () => {
 
     afterAll(async () => {
         await Usermodel.deleteOne({ email: testUser.email });
-        await mongoose.connection.close();
     });
 
     it("should return 401 if no Authorization header is provided", async () => {

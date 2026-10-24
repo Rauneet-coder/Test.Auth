@@ -1,0 +1,19 @@
+:root {
+  --canvas: #f7f8fa;
+  --surface: #ffffff;
+  --surface-soft: #f4f6f4;
+  --ink: #182c26;
+  --muted: #64716a;
+  --line: #e2e8e3;
+  --accent: #235c46;
+  --accent-hover: #194a37;
+  --mint: #eaf4e8;
+  --lime: #d6edb8;
+  --danger: #b53636;
+  --focus: #32825e;
+  --radius: 14px;
+  --sidebar-width: 224px;
+  --shadow: 0 5px 18px #142c2310;
+  --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Manrope", var(--font-body);
+}

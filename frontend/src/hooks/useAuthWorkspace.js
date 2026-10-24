@@ -68,11 +68,24 @@ export default function useAuthWorkspace() {
     setBusy(action);
     setNotice(null);
     setFieldErrors({});
-    const start = performance.now();
+    let start = performance.now();
+    let requestAction = action;
     try {
       const response = await authApi[action](payloadForAction(action, payload), { signal: controller.signal });
       if (!mounted.current || controller.signal.aborted) return null;
       record(createActivityEntry(action, response.status, performance.now() - start, response.data));
+      if (action === "refreshToken") {
+        setAccessToken(response.data.accessToken);
+        setUser(null);
+        setSessionStatus("restoring");
+        requestAction = "getMe";
+        start = performance.now();
+        const profile = await authApi.getMe(undefined, { signal: controller.signal });
+        if (!mounted.current || controller.signal.aborted) return null;
+        record(createActivityEntry("getMe", profile.status, performance.now() - start, profile.data));
+        setUser(profileFromResponse(profile.data));
+        setSessionStatus("signed-in");
+      }
       if (action === "login" || action === "getMe") {
         if (action === "login") {
           setAccessToken(response.data.accessToken);
@@ -104,8 +117,9 @@ export default function useAuthWorkspace() {
     } catch (error) {
       if (!mounted.current || controller.signal.aborted) return null;
       const details = describeRequestError(error, { online: globalThis.navigator?.onLine !== false });
-      record(createActivityEntry(action, details.status, performance.now() - start,
+      record(createActivityEntry(requestAction, details.status, performance.now() - start,
         error.response?.data || { message: details.message }));
+      if (action === "refreshToken") setSessionStatus("signed-out");
       setNotice({ type: "error", message: details.message });
       return null;
     } finally {

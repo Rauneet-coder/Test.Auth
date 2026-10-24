@@ -161,3 +161,28 @@ test("session identity contains display fields and excludes unexpected sensitive
   assert.deepEqual(profileFromResponse(data), { username: "Alex", email: "Alex@example.com" });
   assert.equal(formAfterSuccess("login", { password: "secret", otp: "123456" }, data).password, "");
 });
+
+test("an explicit refresh rotates once and then restores identity with the new access token", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { default: useAuthWorkspace } = await import("../src/hooks/useAuthWorkspace.js");
+  const { default: api, setAccessToken } = await import("../src/services/api.js");
+  const previous = api.defaults.adapter;
+  const requests = [];
+  api.defaults.adapter = async (config) => {
+    requests.push({ path: config.url, authorization: config.headers.Authorization });
+    return { status: 200, data: config.url.endsWith("/refresh-token")
+      ? { message: "Refreshed", accessToken: "rotated-token" }
+      : { message: "Profile", user: { username: "Alex", email: "Alex@example.com" } }, config };
+  };
+  let workspace;
+  function Probe() { workspace = useAuthWorkspace(); return null; }
+  try {
+    renderToStaticMarkup(createElement(Probe));
+    await workspace.run("refreshToken");
+    assert.deepEqual(requests, [
+      { path: "/api/auth/refresh-token", authorization: undefined },
+      { path: "/api/auth/me", authorization: "Bearer rotated-token" },
+    ]);
+  } finally { setAccessToken(null); api.defaults.adapter = previous; }
+});

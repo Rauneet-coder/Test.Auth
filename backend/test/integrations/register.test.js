@@ -81,5 +81,20 @@ describe("POST /api/auth/register", () => {
             expect(response.statusCode).toBe(400);
             expect(response.body).toHaveProperty("errors");
         });
+
+        it("should return 400 validation error if email format is invalid", async () => {
+            const response = await request(app)
+                .post("/api/auth/register")
+                .send({
+                    username: "validusername",
+                    email: "invalid-email-format",
+                    password: "SecurePassword123!"
+                });
+
+            expect(response.statusCode).toBe(400);
+            expect(response.body).toHaveProperty("errors");
+            const emailError = response.body.errors.find((e) => e.field === "email");
+            expect(emailError).toBeDefined();
+        });
     });
 });

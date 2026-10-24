@@ -314,3 +314,32 @@ test("unverified login navigates to verification while preserving the current gu
     if (historyDescriptor) Object.defineProperty(globalThis, "history", historyDescriptor); else delete globalThis.history;
   }
 });
+
+test('returning from a reference view to registration creates one history entry', async () => {
+  const { createElement } = await import('react');
+  const { renderToStaticMarkup } = await import('react-dom/server');
+  const { default: useAuthWorkspace } = await import('../src/hooks/useAuthWorkspace.js');
+  const originalLocation = Object.getOwnPropertyDescriptor(globalThis, 'location');
+  const originalHistory = Object.getOwnPropertyDescriptor(globalThis, 'history');
+  const paths = [];
+  const location = { pathname: '/login', search: '?demo=1', hash: '#guide' };
+  Object.defineProperty(globalThis, 'location', { configurable: true, value: location });
+  Object.defineProperty(globalThis, 'history', { configurable: true, value: {
+    pushState: (_state, _title, path) => {
+      paths.push(path);
+      const url = new URL(path, 'https://aith.test');
+      Object.assign(location, { pathname: url.pathname, search: url.search, hash: url.hash });
+    },
+  } });
+  let workspace;
+  function Probe() { workspace = useAuthWorkspace(); return null; }
+  try {
+    renderToStaticMarkup(createElement(Probe));
+    workspace.changeMode('register', { clearView: true });
+    workspace.changeMode('register', { clearView: true });
+    assert.deepEqual(paths, ['/register?demo=1']);
+  } finally {
+    if (originalLocation) Object.defineProperty(globalThis, 'location', originalLocation); else delete globalThis.location;
+    if (originalHistory) Object.defineProperty(globalThis, 'history', originalHistory); else delete globalThis.history;
+  }
+});

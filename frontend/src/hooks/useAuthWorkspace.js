@@ -43,11 +43,13 @@ export default function useAuthWorkspace() {
     };
   }, []);
 
-  const changeMode = useCallback((next) => {
+  const changeMode = useCallback((next, { clearView = false } = {}) => {
     const safeMode = ["login", "register", "verify"].includes(next) ? next : "login";
     const path = pathFromMode(safeMode);
-    if (globalThis.location && globalThis.location.pathname !== path) {
-      globalThis.history?.pushState(null, "", `${path}${globalThis.location.search || ""}${globalThis.location.hash || ""}`);
+    const location = globalThis.location;
+    const nextUrl = `${path}${location?.search || ""}${clearView ? "" : location?.hash || ""}`;
+    if (location && `${location.pathname}${location.search || ""}${location.hash || ""}` !== nextUrl) {
+      globalThis.history?.pushState(null, "", nextUrl);
     }
     setMode(safeMode);
     setFieldErrors({});

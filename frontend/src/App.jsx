@@ -36,8 +36,8 @@ export default function App() {
   }, [title, view]);
 
   const startMode = (mode) => {
+    workspace.changeMode(mode, { clearView: true });
     navigate('authentication');
-    workspace.changeMode(mode);
     setNoticeArea('auth');
   };
   const runSessionAction = (action) => {

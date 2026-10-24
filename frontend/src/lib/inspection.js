@@ -49,3 +49,18 @@ export function sessionExpiry(expiresAt, now = Date.now()) {
     remaining: hours ? `${hours}h ${minutes}m` : `${minutes}m ${String(seconds % 60).padStart(2, '0')}s`,
   };
 }
+
+export function safeResponseData(data, ancestors = new Set()) {
+  if (data == null) return null;
+  if (typeof data === 'bigint') return data.toString();
+  if (typeof data !== 'object') return data;
+  if (ancestors.has(data)) return '[Circular]';
+  if (data instanceof Date) return Number.isNaN(data.getTime()) ? null : data.toISOString();
+  const next = new Set(ancestors).add(data);
+  if (Array.isArray(data)) return data.map((value) => safeResponseData(value, next));
+  return Object.fromEntries(Object.entries(data).map(([key, value]) => [key, /token|password|authorization|cookie|secret|otp/i.test(key) ? '[hidden]' : safeResponseData(value, next)]));
+}
+
+export function responseJson(data) {
+  return JSON.stringify(safeResponseData(data), null, 2) ?? 'null';
+}

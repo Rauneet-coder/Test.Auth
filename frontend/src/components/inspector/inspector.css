@@ -61,3 +61,9 @@
 .response-card-footer > span:last-child { margin-left: auto; font-size: 9px; font-family: monospace; }
 .response-live-dot { width: 5px; height: 5px; background: #9fb58c; border-radius: 50%; }
 .response-live-dot-busy { background: #bc9857; }
+.response-code-inset { margin-top: 18px; border: 1px solid #26392c; border-radius: 9px; background: #182820; overflow: hidden; }
+.response-code-heading { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #344638; font-size: 9px; color: #a2b398; }
+.response-code-heading > span:last-child { color: #758a71; font-family: monospace; font-size: 8px; }
+.inspector-card .response-code { margin: 0; padding: 14px; min-height: 100px; max-height: 280px; overflow: auto; font-size: 10px; line-height: 1.85; color: #c9ddba; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; scrollbar-width: thin; scrollbar-color: #516749 #182820; }
+.response-code code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+.response-redaction-note { margin: 11px 0 0; display: flex; align-items: center; gap: 5px; font-size: 9px; color: #8d9b80; line-height: 1.5; }

@@ -1,10 +1,11 @@
 import { useId } from 'react';
-import { formatDuration, requestDetails, statusKind, statusLabel } from '../../lib/inspection';
+import { formatDuration, requestDetails, responseJson, statusKind, statusLabel } from '../../lib/inspection';
 import InspectorIcon from './InspectorIcon';
 import './inspector.css';
 
 export default function ResponsePanel({ result, busy, onClear }) {
   const titleId = useId();
+  const output = result ? responseJson(result.data) : '';
   const details = requestDetails(result || {});
   return (
     <section className="inspector-card response-panel" aria-labelledby={titleId}>
@@ -16,6 +17,8 @@ export default function ResponsePanel({ result, busy, onClear }) {
         <div className="response-body">
           <div className="response-request-line"><span className="inspector-method">{details.method}</span><code>{details.path}</code></div>
           <div className="response-status-line"><span className={`inspector-status inspector-status-${statusKind(result.status)}`}>{result.status} {statusLabel(result.status)}</span><span className="response-duration"><InspectorIcon name="clock" size={12} />{formatDuration(result.duration)}</span></div>
+          <div className="response-code-inset"><div className="response-code-heading"><span>Response body</span><span>JSON</span></div><pre className="response-code" tabIndex={0} aria-label="API response body"><code>{output}</code></pre></div>
+          <p className="response-redaction-note"><InspectorIcon name="lock" size={11} />Credentials and tokens are hidden from this output.</p>
         </div>
       ) : (
         <div className="response-empty">

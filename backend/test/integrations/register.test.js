@@ -137,5 +137,8 @@ describe("POST /api/auth/register", () => {
 
         // 1. Password must NEVER equal the plaintext password
         expect(savedUser.password).not.toBe(validUser.password);
+
+        // 2. Password must match standard bcrypt hash format ($2a$ or $2b$)
+        expect(savedUser.password).toMatch(/^\$2[ab]\$\d{2}\$/);
     });
 });

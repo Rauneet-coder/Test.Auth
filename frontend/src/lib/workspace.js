@@ -25,3 +25,19 @@ export function modeFromPath(pathname) {
 export function pathFromMode(mode) {
   return mode === "register" ? "/register" : mode === "verify" ? "/verify" : "/login";
 }
+
+/** Project fields explicitly so UI state and unrelated secrets never reach the API. */
+export function payloadForAction(action, fields = {}) {
+  getAction(action);
+  const email = typeof fields.email === "string" ? fields.email.trim() : "";
+  const password = typeof fields.password === "string" ? fields.password : "";
+  if (action === "register") {
+    const username = typeof fields.username === "string" ? fields.username.trim() : "";
+    return { username, email, password };
+  }
+  if (action === "login") return { email, password };
+  if (action === "verifyEmail") {
+    return { email, otp: typeof fields.otp === "string" ? fields.otp : "" };
+  }
+  return undefined;
+}

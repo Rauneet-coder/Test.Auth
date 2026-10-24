@@ -64,3 +64,32 @@ export function safeResponseData(data, ancestors = new Set()) {
 export function responseJson(data) {
   return JSON.stringify(safeResponseData(data), null, 2) ?? 'null';
 }
+
+export async function copyResponse(data, context = globalThis) {
+  const text = responseJson(data);
+  try {
+    if (context.navigator?.clipboard?.writeText) {
+      await context.navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch { /* Use the selection fallback when clipboard permission is unavailable. */ }
+  const doc = context.document;
+  if (!doc?.body || typeof doc.execCommand !== 'function') return false;
+  const previousFocus = doc.activeElement;
+  const field = doc.createElement('textarea');
+  field.value = text;
+  field.readOnly = true;
+  field.style.position = 'fixed';
+  field.style.left = '-9999px';
+  field.setAttribute('aria-hidden', 'true');
+  doc.body.appendChild(field);
+  try {
+    field.select();
+    return Boolean(doc.execCommand('copy'));
+  } catch {
+    return false;
+  } finally {
+    field.remove();
+    previousFocus?.focus?.({ preventScroll: true });
+  }
+}

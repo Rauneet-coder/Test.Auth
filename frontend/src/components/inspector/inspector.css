@@ -67,3 +67,8 @@
 .inspector-card .response-code { margin: 0; padding: 14px; min-height: 100px; max-height: 280px; overflow: auto; font-size: 10px; line-height: 1.85; color: #c9ddba; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; scrollbar-width: thin; scrollbar-color: #516749 #182820; }
 .response-code code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 .response-redaction-note { margin: 11px 0 0; display: flex; align-items: center; gap: 5px; font-size: 9px; color: #8d9b80; line-height: 1.5; }
+.response-tools { display: flex; align-items: center; justify-content: flex-end; gap: 7px; margin-top: 14px; }
+.inspector-button.response-tool { font-size: 9px; min-height: 30px; padding: 6px 8px; gap: 5px; border-color: #e4eade; color: #718264; }
+.response-tool-feedback { font-size: 10px; line-height: 1.5; color: #69815b; margin: 8px 0 0; }
+.response-tool-feedback:empty { display: none; }
+.response-tools + .response-tool-feedback + .response-code-inset { margin-top: 10px; }

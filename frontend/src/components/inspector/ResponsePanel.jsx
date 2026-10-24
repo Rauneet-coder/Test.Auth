@@ -1,10 +1,17 @@
-import { useId } from 'react';
-import { formatDuration, requestDetails, responseJson, statusKind, statusLabel } from '../../lib/inspection';
+import { useEffect, useId, useState } from 'react';
+import { copyResponse, formatDuration, requestDetails, responseJson, statusKind, statusLabel } from '../../lib/inspection';
 import InspectorIcon from './InspectorIcon';
 import './inspector.css';
 
 export default function ResponsePanel({ result, busy, onClear }) {
   const titleId = useId();
+  const [copyState, setCopyState] = useState('');
+  useEffect(() => { setCopyState(''); }, [result]);
+  async function handleCopy() {
+    setCopyState('copying');
+    const copied = await copyResponse(result?.data);
+    setCopyState(copied ? 'copied' : 'failed');
+  }
   const output = result ? responseJson(result.data) : '';
   const details = requestDetails(result || {});
   return (
@@ -17,6 +24,8 @@ export default function ResponsePanel({ result, busy, onClear }) {
         <div className="response-body">
           <div className="response-request-line"><span className="inspector-method">{details.method}</span><code>{details.path}</code></div>
           <div className="response-status-line"><span className={`inspector-status inspector-status-${statusKind(result.status)}`}>{result.status} {statusLabel(result.status)}</span><span className="response-duration"><InspectorIcon name="clock" size={12} />{formatDuration(result.duration)}</span></div>
+          <div className="response-tools"><button type="button" className="inspector-button response-tool" disabled={copyState === 'copying'} onClick={handleCopy}><InspectorIcon name={copyState === 'copied' ? 'check' : 'copy'} size={13} />{copyState === 'copied' ? 'Copied' : copyState === 'copying' ? 'Copying…' : 'Copy JSON'}</button></div>
+          <p className="response-tool-feedback" role="status">{copyState === 'copied' ? 'Redacted response copied.' : copyState === 'failed' ? 'Copy unavailable. Select the response below to copy it manually.' : ''}</p>
           <div className="response-code-inset"><div className="response-code-heading"><span>Response body</span><span>JSON</span></div><pre className="response-code" tabIndex={0} aria-label="API response body"><code>{output}</code></pre></div>
           <p className="response-redaction-note"><InspectorIcon name="lock" size={11} />Credentials and tokens are hidden from this output.</p>
         </div>

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { requestDetails, statusKind, statusLabel, formatDuration, sessionExpiry, responseJson } from '../src/lib/inspection.js';
+import { requestDetails, statusKind, statusLabel, formatDuration, sessionExpiry, responseJson, copyResponse } from '../src/lib/inspection.js';
 
 test('request details use supported backend routes and preserve supplied metadata', () => {
   assert.equal(requestDetails({ action: 'getMe' }).path, '/api/auth/me');
@@ -41,4 +41,12 @@ test('response JSON recursively hides credentials and handles non-JSON values sa
   source.circular = source;
   assert.equal(JSON.parse(responseJson(source)).circular, '[Circular]');
   assert.equal(responseJson(undefined), 'null');
+});
+
+test('clipboard exports redact secrets and report unsupported copy honestly', async () => {
+  let copied = '';
+  assert.equal(await copyResponse({ password: 'private' }, { navigator: { clipboard: { writeText: async (text) => { copied = text; } } } }), true);
+  assert.equal(JSON.parse(copied).password, '[hidden]');
+  assert.equal(await copyResponse({}, {}), false);
+  assert.equal(await copyResponse({}, { navigator: { clipboard: { writeText: async () => { throw Error('Denied'); } } } }), false);
 });

@@ -36,3 +36,15 @@ test("username does not gain an unsupported character restriction", () => {
   assert.equal(validation.validateUsername("Alex Morgan"), "");
   assert.equal(validation.validateUsername("alex.morgan"), "");
 });
+
+test("OTP normalization preserves zeroes and supports formatted paste", () => {
+  assert.equal(validation.normalizeOtp("01 23-45"), "012345");
+  assert.equal(validation.normalizeOtp("code: 1234567"), "123456");
+  assert.equal(validation.normalizeOtp("abcdef"), "");
+});
+test("OTP requires exactly six ASCII digits", () => {
+  assert.equal(validation.validateOtp("012345"), "");
+  for (const value of ["", "12345", "1234567", "12a456", "１２３４５６"]) {
+    assert.notEqual(validation.validateOtp(value), "", value);
+  }
+});

@@ -26,3 +26,11 @@ export function validateUsername(value = "") {
   if (value.length > 30) return "Keep your username to 30 characters or fewer.";
   return "";
 }
+
+/** Codes remain strings so leading zeroes survive paste and submission. */
+export function normalizeOtp(value = "") {
+  return String(value).replace(/[^0-9]/g, "").slice(0, 6);
+}
+export function validateOtp(value = "") {
+  return /^[0-9]{6}$/.test(value) ? "" : "Enter all 6 digits from your verification email.";
+}

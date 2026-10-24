@@ -81,3 +81,8 @@
 .response-metadata dt { color: #8f9d83; }
 .response-metadata dd { margin: 0; color: #617657; overflow-wrap: anywhere; }
 .response-metadata dd code { font-size: 9px; }
+.response-code-heading button { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: transparent; font-size: inherit; color: inherit; }
+.response-code-heading button[aria-expanded="true"] svg { transform: rotate(90deg); }
+.response-code-heading button:hover { color: #d5e4cc; }
+.response-collapsed-note { margin: 0; padding: 15px; color: #82977a; font-size: 10px; }
+.inspector-card .response-code[hidden] { display: none; }

@@ -93,3 +93,28 @@ export async function copyResponse(data, context = globalThis) {
     previousFocus?.focus?.({ preventScroll: true });
   }
 }
+
+export function responseFilename(entry = {}) {
+  const action = String(entry.action || 'response').replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 64);
+  return `aith-${action || 'response'}.json`;
+}
+
+export function downloadResponse(entry, context = globalThis) {
+  if (!entry || !context.document?.body || !context.URL?.createObjectURL || !context.Blob) return false;
+  let url;
+  let link;
+  try {
+    url = context.URL.createObjectURL(new context.Blob([responseJson(entry.data)], { type: 'application/json;charset=utf-8' }));
+    link = context.document.createElement('a');
+    link.href = url;
+    link.download = responseFilename(entry);
+    context.document.body.appendChild(link);
+    link.click();
+    return true;
+  } catch {
+    return false;
+  } finally {
+    link?.remove();
+    if (url) (context.setTimeout || setTimeout)(() => context.URL.revokeObjectURL(url), 1000);
+  }
+}

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { requestDetails, statusKind, statusLabel, formatDuration, sessionExpiry, responseJson, copyResponse } from '../src/lib/inspection.js';
+import { requestDetails, statusKind, statusLabel, formatDuration, sessionExpiry, responseJson, copyResponse, responseFilename, downloadResponse } from '../src/lib/inspection.js';
 
 test('request details use supported backend routes and preserve supplied metadata', () => {
   assert.equal(requestDetails({ action: 'getMe' }).path, '/api/auth/me');
@@ -49,4 +49,10 @@ test('clipboard exports redact secrets and report unsupported copy honestly', as
   assert.equal(JSON.parse(copied).password, '[hidden]');
   assert.equal(await copyResponse({}, {}), false);
   assert.equal(await copyResponse({}, { navigator: { clipboard: { writeText: async () => { throw Error('Denied'); } } } }), false);
+});
+
+test('response downloads use safe filenames and fail gracefully without browser APIs', () => {
+  assert.equal(responseFilename({ action: 'getMe' }), 'aith-getMe.json');
+  assert.equal(responseFilename({ action: '../../secret\n' }).includes('/'), false);
+  assert.equal(downloadResponse({ data: {} }, {}), false);
 });

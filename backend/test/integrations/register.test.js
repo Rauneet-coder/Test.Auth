@@ -44,15 +44,17 @@ describe("POST /api/auth/register", () => {
         expect(response.body.user.verified).toBe(false);
     });
 
-    it("should return 409 if user already exists", async () => {
-        // Attempting to register the exact same user again
-        const response = await request(app).post("/api/auth/register").send({
-            username: "uniqueuser123",
-            email: "unique.testuser@example.com",
-            password: "SecurePassword123!"
-        });
-        
+    // ─── P0: Register duplicate email/username ────────────────────────────────
+    it("should return 409 if email already exists", async () => {
+        const response = await request(app)
+            .post("/api/auth/register")
+            .send({
+                username: "differentusername",
+                email: validUser.email,
+                password: "SecurePassword123!"
+            });
+
         expect(response.statusCode).toBe(409);
-        expect(response.body).toHaveProperty("message");
+        expect(response.body).toHaveProperty("message", "User already exists");
     });
 });

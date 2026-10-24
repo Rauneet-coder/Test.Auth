@@ -88,3 +88,16 @@
   .auth-otp-slot { font-size:21px; }
   .auth-tabs button { padding-inline:7px; font-size:12px; }
 }
+
+.auth-form-panel button:focus-visible,.auth-form-panel input:focus-visible { outline:3px solid #235c46; outline-offset:3px; }
+.auth-input:focus-visible { border-color:var(--auth-primary); }
+.auth-otp-entry:focus-within { outline:2px solid #235c46; outline-offset:5px; border-radius:9px; }
+.auth-input,.auth-submit,.auth-tabs button,.auth-password-toggle { transition:background-color .16s,border-color .16s,box-shadow .16s; }
+@media (prefers-reduced-motion:reduce) {
+  .auth-form-panel * { transition:none !important; animation:none !important; }
+}
+@media (forced-colors:active) {
+  .auth-otp-slot { border:1px solid CanvasText; }
+  .auth-otp-entry:focus-within .auth-otp-active { outline:2px solid Highlight; }
+  .auth-submit { border:1px solid ButtonText; }
+}

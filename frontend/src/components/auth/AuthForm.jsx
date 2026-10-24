@@ -27,7 +27,8 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
     if (Object.keys(nextErrors).length) {
       event.preventDefault();
       const order = mode === "register" ? ["username", "email", "password"] : mode === "verify" ? ["email", "otp"] : ["email", "password"];
-      fieldRefs.current[order.find((name) => nextErrors[name])]?.focus();
+      const firstInvalid = order.find((name) => nextErrors[name]);
+      requestAnimationFrame(() => fieldRefs.current[firstInvalid]?.focus());
       return;
     }
     if (onSubmit) onSubmit(event);
@@ -67,6 +68,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
       </div>
       <form className="auth-form" onSubmit={handleSubmit} noValidate aria-busy={!!busy}>
         <FormNotice notice={notice} onDismiss={onDismissNotice} />
+        {Object.values(clientErrors).some(Boolean) && <p className="auth-sr-only" role="alert">Check the highlighted fields and try again.</p>}
         {mode === "verify" && <div className="auth-verification-guide">
           <p>Verifying <strong>{fields.email || "your email address"}</strong></p>
           <span>Codes expire after 5 minutes. Check your spam or junk folder if you don’t see the email.</span>

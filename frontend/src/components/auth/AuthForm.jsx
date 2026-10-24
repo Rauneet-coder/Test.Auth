@@ -4,6 +4,7 @@ import AuthField from "./AuthField";
 import ModeTabs from "./ModeTabs";
 import PasswordChecklist from "./PasswordChecklist";
 import OtpField from "./OtpField";
+import FormNotice from "./FormNotice";
 import { validateForm } from "../../lib/formValidation";
 
 const EMPTY_ERRORS = {};
@@ -63,6 +64,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
         <p>A secure place to get started.</p>
       </div>
       <form className="auth-form" onSubmit={handleSubmit} noValidate aria-busy={!!busy}>
+        <FormNotice notice={notice} onDismiss={onDismissNotice} />
         {mode === "register" && field("username", "Username")}
         {field("email", "Email address", "email")}
         {mode === "verify" ? <OtpField id={`${formId}-otp`} value={fields.otp || ""} onChange={(value) => updateField("otp", value)} inputRef={(element) => { fieldRefs.current.otp = element; }} error={clientErrors.otp || (!editedFields.otp && errors.otp) || undefined} disabled={!!busy} /> : field("password", "Password", "password")}

@@ -140,5 +140,9 @@ describe("POST /api/auth/register", () => {
 
         // 2. Password must match standard bcrypt hash format ($2a$ or $2b$)
         expect(savedUser.password).toMatch(/^\$2[ab]\$\d{2}\$/);
+
+        // 3. bcrypt.compare must verify the raw password against the hash
+        const isMatch = await bcrypt.compare(validUser.password, savedUser.password);
+        expect(isMatch).toBe(true);
     });
 });

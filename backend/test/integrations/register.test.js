@@ -39,6 +39,8 @@ describe("POST /api/auth/register", () => {
         expect(response.statusCode).toBe(201);
         expect(response.body).toHaveProperty("message", "User registered successfully");
         expect(response.body).toHaveProperty("user");
+        expect(response.body.user.username).toBe(validUser.username);
+        expect(response.body.user.email).toBe(validUser.email);
         expect(response.body.user.verified).toBe(false);
     });
 

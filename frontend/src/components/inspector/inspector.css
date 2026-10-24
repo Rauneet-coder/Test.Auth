@@ -29,3 +29,9 @@
 .session-signout-actions { display: flex; flex: 0 0 auto; gap: 12px; }
 .session-signout-actions button { border: 0; background: transparent; padding: 3px 0; font-size: 9px; color: #64775d; text-decoration: underline; text-underline-offset: 3px; }
 .session-signout-actions button:not(:disabled):hover { color: #235c46; }
+.session-confirm { margin-top: 18px; padding: 15px; background: #fdf9f5; border: 1px solid #eee0d3; border-radius: 9px; }
+.session-confirm h3 { margin: 0; font-size: 12px; color: #654a36; font-weight: 600; }
+.session-confirm p { margin: 7px 0 13px; font-size: 11px; color: #8a7868; line-height: 1.6; }
+.session-confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.inspector-button.inspector-button-danger { background: #824d3c; border-color: #824d3c; color: white; }
+.inspector-button.inspector-button-danger:not(:disabled):hover { background: #6c3b2c; border-color: #6c3b2c; }

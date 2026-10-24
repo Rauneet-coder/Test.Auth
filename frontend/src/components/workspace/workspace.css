@@ -1,0 +1,7 @@
+.workspace-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font: 800 29px/1 var(--font-display); letter-spacing: -1.8px; text-decoration: none; }
+.workspace-brand-symbol { display: grid; place-items: center; width: 35px; height: 35px; color: var(--accent); background: var(--mint); border: 1px solid #d8e7dc; border-radius: 10px; }
+.workspace-brand-symbol svg { width: 28px; height: 28px; }
+.workspace-brand-dot { color: var(--accent); }
+.workspace-brand.inverse { color: #fff; }
+.workspace-brand.inverse .workspace-brand-symbol { color: var(--lime); background: #ffffff12; border-color: #ffffff22; }
+.workspace-brand.inverse .workspace-brand-dot { color: var(--lime); }

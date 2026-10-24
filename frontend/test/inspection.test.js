@@ -145,3 +145,13 @@ test('redaction does not mutate the original response or mistake shared values f
   assert.equal(output.first.password, '[hidden]');
   assert.equal(shared.password, 'keep-in-original-only');
 });
+
+test('malformed successful responses appear in error counts and filters', () => {
+  const history = [{ id: 'invalid', action: 'login', status: 'INVALID' }];
+  assert.equal(statusKind('INVALID'), 'error');
+  assert.equal(statusLabel('INVALID'), 'Invalid response');
+  assert.equal(requestCounts(history).error, 1);
+  assert.deepEqual(filterRequests(history, { status: 'error' }), history);
+  assert.deepEqual(filterRequests(history, { status: 'success' }), []);
+  assert.deepEqual(filterRequests(history, { status: 'network' }), []);
+});

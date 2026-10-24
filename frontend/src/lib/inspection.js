@@ -20,12 +20,13 @@ export function requestDetails(entry = {}) {
 export function statusKind(status) {
   const code = Number(status);
   if (Number.isFinite(code) && code >= 200 && code < 400) return 'success';
-  if (status === 'ERR' || (Number.isFinite(code) && code >= 400)) return 'error';
+  if (status === 'ERR' || status === 'INVALID' || (Number.isFinite(code) && code >= 400)) return 'error';
   return 'neutral';
 }
 
 export function statusLabel(status) {
   if (status === 'ERR') return 'Network error';
+  if (status === 'INVALID') return 'Invalid response';
   const labels = { 200: 'OK', 201: 'Created', 204: 'No content', 400: 'Bad request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not found', 409: 'Conflict', 422: 'Validation error', 429: 'Too many requests', 500: 'Server error' };
   return labels[Number(status)] || (statusKind(status) === 'success' ? 'Completed' : statusKind(status) === 'error' ? 'Request failed' : 'Unknown status');
 }

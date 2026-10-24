@@ -96,5 +96,20 @@ describe("POST /api/auth/register", () => {
             const emailError = response.body.errors.find((e) => e.field === "email");
             expect(emailError).toBeDefined();
         });
+
+        it("should return 400 validation error if username is too short (< 3 chars)", async () => {
+            const response = await request(app)
+                .post("/api/auth/register")
+                .send({
+                    username: "ab",
+                    email: "valid@example.com",
+                    password: "SecurePassword123!"
+                });
+
+            expect(response.statusCode).toBe(400);
+            expect(response.body).toHaveProperty("errors");
+            const usernameError = response.body.errors.find((e) => e.field === "username");
+            expect(usernameError).toBeDefined();
+        });
     });
 });

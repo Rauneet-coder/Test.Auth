@@ -5,9 +5,10 @@ import { createRateLimiter } from "../../src/middlewares/rateLimiter.js";
 
 describe("Rate Limiting Middleware", () => {
     it("should allow requests under the limit and reject excess requests with 429", async () => {
+        // Create an isolated Express app with a strict limit of 3 requests
         const testApp = express();
         const testLimiter = createRateLimiter({
-            windowMs: 60 * 1000,
+            windowMs: 60 * 1000, // 1 minute
             limit: 3,
             message: {
                 error: "TOO_MANY_REQUESTS",
@@ -19,13 +20,26 @@ describe("Rate Limiting Middleware", () => {
             res.status(200).json({ status: "success" });
         });
 
+        // 1st request — allowed (200)
         const res1 = await request(testApp).get("/api/test-rate-limit");
         expect(res1.statusCode).toBe(200);
 
+        // 2nd request — allowed (200)
         const res2 = await request(testApp).get("/api/test-rate-limit");
         expect(res2.statusCode).toBe(200);
 
+        // 3rd request — allowed (200, reached limit)
         const res3 = await request(testApp).get("/api/test-rate-limit");
         expect(res3.statusCode).toBe(200);
+
+        // 4th request — EXCEEDS limit, must be rejected with 429
+        const res4 = await request(testApp).get("/api/test-rate-limit");
+        expect(res4.statusCode).toBe(429);
+        expect(res4.body).toHaveProperty("error", "TOO_MANY_REQUESTS");
+        expect(res4.body).toHaveProperty("message");
+
+        // 5th request — still blocked with 429
+        const res5 = await request(testApp).get("/api/test-rate-limit");
+        expect(res5.statusCode).toBe(429);
     });
 });

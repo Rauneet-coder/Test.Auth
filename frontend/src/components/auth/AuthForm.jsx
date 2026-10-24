@@ -11,6 +11,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
   const formId = useId();
   const fieldRefs = useRef({});
   const [clientErrors, setClientErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
   const [editedFields, setEditedFields] = useState({});
   useEffect(() => { setEditedFields({}); }, [errors]);
   const handleSubmit = (event) => {
@@ -26,7 +27,8 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
     else event.preventDefault();
   };
   const field = (name, label, type = "text") => (
-    <AuthField key={name} id={`${formId}-${name}`} name={name} label={label} type={type}
+    <AuthField key={name} id={`${formId}-${name}`} name={name} label={label} type={name === "password" && showPassword ? "text" : type}
+      trailing={name === "password" && <button className="auth-password-toggle" type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} disabled={!!busy} onClick={() => setShowPassword((previous) => !previous)}>{showPassword ? "Hide" : "Show"}</button>}
       inputRef={(element) => { fieldRefs.current[name] = element; }}
       error={clientErrors[name] || (!editedFields[name] && errors[name]) || undefined}
       value={fields[name] || ""} onChange={(event) => {

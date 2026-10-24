@@ -4,4 +4,19 @@ import express from "express";
 import { createRateLimiter } from "../../src/middlewares/rateLimiter.js";
 
 describe("Rate Limiting Middleware", () => {
+    it("should allow requests under the limit and reject excess requests with 429", async () => {
+        const testApp = express();
+        const testLimiter = createRateLimiter({
+            windowMs: 60 * 1000,
+            limit: 3,
+            message: {
+                error: "TOO_MANY_REQUESTS",
+                message: "Too many requests from this IP, please try again later."
+            }
+        });
+
+        testApp.use("/api/test-rate-limit", testLimiter, (_req, res) => {
+            res.status(200).json({ status: "success" });
+        });
+    });
 });

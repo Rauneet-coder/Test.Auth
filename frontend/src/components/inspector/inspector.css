@@ -86,3 +86,20 @@
 .response-code-heading button:hover { color: #d5e4cc; }
 .response-collapsed-note { margin: 0; padding: 15px; color: #82977a; font-size: 10px; }
 .inspector-card .response-code[hidden] { display: none; }
+.activity-panel { margin: 30px 0; color: #182c26; min-width: 0; }
+.activity-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+.activity-card-heading h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 12px; font-weight: 600; letter-spacing: -.1px; }
+.activity-card-heading h2 svg { color: #7c8f72; }
+.activity-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 17px; border: 1px solid #dfe6d7; color: #86967a; border-radius: 4px; font-size: 9px; font-weight: 500; }
+.activity-visit-label { color: #96a38a; font-size: 8px; letter-spacing: 1.1px; text-transform: uppercase; }
+.activity-rows { list-style: none; padding: 0; margin: 0; background: #fff; border: 1px solid #e2e8dd; border-radius: 9px; overflow: hidden; }
+.activity-rows li + li { border-top: 1px solid #edf1e7; }
+.activity-row { width: 100%; display: flex; align-items: center; gap: 13px; padding: 13px 16px; color: #627856; text-align: left; font-size: 11px; }
+.activity-state-dot { width: 5px; height: 5px; border-radius: 50%; background: #a2ad98; flex-shrink: 0; }
+.activity-state-success { background: #68a06b; }
+.activity-state-error { background: #c88360; }
+.activity-path { font-size: 10px; overflow-wrap: anywhere; min-width: 0; }
+.activity-response-status { margin-left: auto; padding: 3px 5px; border-radius: 4px; font-size: 9px; font-weight: 500; }
+.activity-duration { min-width: 44px; text-align: right; font-size: 9px; color: #92a082; font-variant-numeric: tabular-nums; }
+.activity-row time { color: #9aa68b; font-size: 9px; font-variant-numeric: tabular-nums; }
+.activity-empty-state { border: 1px dashed #dfe6d7; border-radius: 9px; padding: 23px; text-align: center; font-size: 11px; line-height: 1.7; color: #99a48c; margin: 0; }

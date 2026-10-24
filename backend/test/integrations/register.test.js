@@ -111,5 +111,20 @@ describe("POST /api/auth/register", () => {
             const usernameError = response.body.errors.find((e) => e.field === "username");
             expect(usernameError).toBeDefined();
         });
+
+        it("should return 400 validation error if password lacks uppercase, number, or special char", async () => {
+            const response = await request(app)
+                .post("/api/auth/register")
+                .send({
+                    username: "validusername",
+                    email: "valid@example.com",
+                    password: "weakpassword123"
+                });
+
+            expect(response.statusCode).toBe(400);
+            expect(response.body).toHaveProperty("errors");
+            const passwordError = response.body.errors.find((e) => e.field === "password");
+            expect(passwordError).toBeDefined();
+        });
     });
 });

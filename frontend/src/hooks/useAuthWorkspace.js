@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { authApi, describeRequestError } from "../services/api.js";
 import {
   appendActivity, createActivityEntry, getAction, modeFromPath, payloadForAction,
@@ -6,6 +6,15 @@ import {
 
 export default function useAuthWorkspace() {
   const inFlight = useRef(false);
+  const mounted = useRef(true);
+  const requestController = useRef(null);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      requestController.current?.abort();
+    };
+  }, []);
   const [mode, setMode] = useState(() => modeFromPath(globalThis.location?.pathname));
   const [fields, setFields] = useState({ username: "", email: "", password: "", otp: "" });
   const [fieldErrors, setFieldErrors] = useState({});
@@ -36,16 +45,20 @@ export default function useAuthWorkspace() {
     if (inFlight.current) return null;
     getAction(action);
     inFlight.current = true;
+    const controller = new AbortController();
+    requestController.current = controller;
     setBusy(action);
     setNotice(null);
     setFieldErrors({});
     const start = performance.now();
     try {
-      const response = await authApi[action](payloadForAction(action, payload));
+      const response = await authApi[action](payloadForAction(action, payload), { signal: controller.signal });
+      if (!mounted.current || controller.signal.aborted) return null;
       record(createActivityEntry(action, response.status, performance.now() - start, response.data));
       setNotice({ type: "success", message: response.data.message });
       return response;
     } catch (error) {
+      if (!mounted.current || controller.signal.aborted) return null;
       const details = describeRequestError(error, { online: globalThis.navigator?.onLine !== false });
       record(createActivityEntry(action, details.status, performance.now() - start,
         error.response?.data || { message: details.message }));
@@ -53,7 +66,8 @@ export default function useAuthWorkspace() {
       return null;
     } finally {
       inFlight.current = false;
-      setBusy("");
+      if (requestController.current === controller) requestController.current = null;
+      if (mounted.current) setBusy("");
     }
   }, [record]);
 

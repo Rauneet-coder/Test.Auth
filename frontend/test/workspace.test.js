@@ -88,3 +88,25 @@ test("a synchronous request lock prevents duplicate requests before React rerend
     api.defaults.adapter = previous;
   }
 });
+
+test("rendering the workspace never automatically refreshes or dispatches auth requests", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { default: useAuthWorkspace } = await import("../src/hooks/useAuthWorkspace.js");
+  const { default: api } = await import("../src/services/api.js");
+  const previous = api.defaults.adapter;
+  let dispatches = 0;
+  api.defaults.adapter = async () => { dispatches++; throw new Error("Unexpected request"); };
+  function Probe() {
+    const workspace = useAuthWorkspace();
+    assert.equal(workspace.sessionStatus, "signed-out");
+    assert.equal(workspace.busy, "");
+    return null;
+  }
+  try {
+    renderToStaticMarkup(createElement(Probe));
+    renderToStaticMarkup(createElement(Probe));
+    await Promise.resolve();
+    assert.equal(dispatches, 0);
+  } finally { api.defaults.adapter = previous; }
+});

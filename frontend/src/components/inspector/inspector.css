@@ -155,3 +155,25 @@ button.activity-row.activity-row-selected { background: #f0f5e9; box-shadow: ins
   .session-confirm-actions .inspector-button { width: 100%; }
   .session-expiry { padding-left: 0; margin-top: 12px; }
 }
+@media (max-width: 600px) {
+  .inspector-card .response-heading { padding: 18px 21px; }
+  .response-body { padding: 18px 21px; }
+  .response-request-line { align-items: flex-start; }
+  .response-request-line code { line-height: 1.8; }
+  .response-status-line { flex-wrap: wrap; gap: 9px; }
+  .response-tools { justify-content: flex-start; margin-top: 15px; }
+  .inspector-button.response-tool { min-height: 39px; padding: 9px 11px; font-size: 10px; }
+  .response-code-heading { padding: 10px 12px; }
+  .response-code-heading button { min-height: 24px; font-size: 10px; }
+  .inspector-card .response-code { padding: 12px; font-size: 11px; max-height: 320px; }
+  .response-metadata summary { min-height: 32px; }
+  .response-metadata dl > div { grid-template-columns: 67px minmax(0, 1fr); }
+  .response-card-footer { padding: 12px 21px; }
+  .response-empty { padding: 33px 16px; }
+}
+@media (max-width: 380px) {
+  .inspector-card .response-heading, .response-body { padding-left: 18px; padding-right: 18px; }
+  .response-redaction-note { align-items: flex-start; }
+  .response-redaction-note svg { flex-shrink: 0; margin-top: 2px; }
+  .response-metadata dl > div { grid-template-columns: 1fr; gap: 3px; }
+}

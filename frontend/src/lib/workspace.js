@@ -100,3 +100,20 @@ export function fieldErrorsFromResponse(data) {
   }
   return errors;
 }
+
+/** Display metadata only. Backend responses remain the authority for authentication. */
+export function tokenExpiresAt(token) {
+  if (typeof token !== "string" || token.length > 16_384) return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const bytes = Uint8Array.from(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, "=")), (char) => char.charCodeAt(0));
+    const payload = JSON.parse(new TextDecoder().decode(bytes));
+    const milliseconds = payload.exp * 1000;
+    return typeof payload.exp === "number" && Number.isFinite(milliseconds) &&
+      milliseconds > 0 && milliseconds <= 8.64e15 ? milliseconds : null;
+  } catch {
+    return null;
+  }
+}

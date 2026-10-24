@@ -246,3 +246,13 @@ test("offline requests are stopped before transport without inventing API activi
     if (descriptor) Object.defineProperty(globalThis, "navigator", descriptor); else delete globalThis.navigator;
   }
 });
+
+test("JWT expiry is optional display metadata that handles invalid and Unicode payloads", async () => {
+  const { tokenExpiresAt } = await import("../src/lib/workspace.js");
+  const token = (payload) => `header.${Buffer.from(JSON.stringify(payload)).toString("base64url")}.signature`;
+  assert.equal(tokenExpiresAt(token({ exp: 1792836000, username: "आकाश" })), 1792836000000);
+  assert.equal(tokenExpiresAt(token({ exp: "1792836000" })), null);
+  assert.equal(tokenExpiresAt(token({ exp: 1e20 })), null);
+  assert.equal(tokenExpiresAt(token({})), null);
+  for (const value of [null, "opaque-token", "a.!.c", "a.b.c.d"]) assert.equal(tokenExpiresAt(value), null);
+});

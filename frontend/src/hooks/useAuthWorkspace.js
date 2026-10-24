@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authApi, describeRequestError, setAccessToken } from "../services/api.js";
 import {
-  appendActivity, createActivityEntry, fieldErrorsFromResponse, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction, profileFromResponse,
+  appendActivity, createActivityEntry, fieldErrorsFromResponse, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction, profileFromResponse, tokenExpiresAt,
 } from "../lib/workspace.js";
 
 export default function useAuthWorkspace() {
@@ -25,7 +25,7 @@ export default function useAuthWorkspace() {
   const [user, setUser] = useState(null);
   const [sessionStatus, setSessionStatus] = useState("signed-out");
   const [online, setOnline] = useState(() => globalThis.navigator?.onLine !== false);
-  const [expiresAt] = useState(null);
+  const [expiresAt, setExpiresAt] = useState(null);
   useEffect(() => {
     const updateConnection = () => setOnline(globalThis.navigator?.onLine !== false);
     globalThis.addEventListener?.("online", updateConnection);
@@ -95,6 +95,7 @@ export default function useAuthWorkspace() {
       record(createActivityEntry(action, response.status, performance.now() - start, response.data));
       if (action === "refreshToken") {
         setAccessToken(response.data.accessToken);
+        setExpiresAt(tokenExpiresAt(response.data.accessToken));
         setUser(null);
         setSessionStatus("restoring");
         requestAction = "getMe";
@@ -108,6 +109,7 @@ export default function useAuthWorkspace() {
       if (action === "login" || action === "getMe") {
         if (action === "login") {
           setAccessToken(response.data.accessToken);
+        setExpiresAt(tokenExpiresAt(response.data.accessToken));
           setFields((previous) => formAfterSuccess(action, previous, response.data));
         }
         setUser(profileFromResponse(response.data));
@@ -115,6 +117,7 @@ export default function useAuthWorkspace() {
       }
       if (action === "logout" || action === "logoutAll") {
         setAccessToken(null);
+        setExpiresAt(null);
         setUser(null);
         setSessionStatus("signed-out");
         setFields((previous) => ({ ...previous, password: "", otp: "" }));
@@ -141,6 +144,7 @@ export default function useAuthWorkspace() {
         error.response?.data || { message: details.message }));
       if (error.response?.status === 401) {
         setAccessToken(null);
+        setExpiresAt(null);
         setUser(null);
         setSessionStatus("expired");
       } else if (action === "refreshToken") {

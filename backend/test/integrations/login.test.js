@@ -45,6 +45,16 @@ describe("POST /api/auth/login", () => {
         });
     });
 
+    // ─── P0: Login with wrong password ───────────────────────────────────────
+    it("should reject login if password is incorrect", async () => {
+        const response = await request(app)
+            .post("/api/auth/login")
+            .send({
+                email: verifiedUser.email,
+                password: "WrongPassword999!"
+            });
+    });
+
     it("should return 400 if email or password are missing", async () => {
         const response = await request(app)
             .post("/api/auth/login")

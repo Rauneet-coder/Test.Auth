@@ -55,6 +55,10 @@ describe("POST /api/auth/refresh-token", () => {
         expect(response.body).toEqual({ message: "Unauthorized" });
     });
 
+    // ─── Negative Test 2: Invalid or Corrupted Token ─────────────────────────
+    it("should return 401 if refresh token is invalid or corrupted", async () => {
+    });
+
     // ─── Positive Test: Refresh Token & Rotation ─────────────────────────────
     let rotatedCookies;
     it("should return 200 and issue a new access token and rotated refresh token", async () => {

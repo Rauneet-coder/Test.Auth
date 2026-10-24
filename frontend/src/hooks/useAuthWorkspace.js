@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authApi, describeRequestError, setAccessToken } from "../services/api.js";
 import {
-  appendActivity, createActivityEntry, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction, profileFromResponse,
+  appendActivity, createActivityEntry, fieldErrorsFromResponse, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction, profileFromResponse,
 } from "../lib/workspace.js";
 
 export default function useAuthWorkspace() {
@@ -53,6 +53,11 @@ export default function useAuthWorkspace() {
   const updateField = useCallback((name, value) => {
     if (!["username", "email", "password", "otp"].includes(name)) return;
     setFields((previous) => ({ ...previous, [name]: value }));
+    setFieldErrors((previous) => {
+      const next = { ...previous };
+      delete next[name];
+      return next;
+    });
   }, []);
   const record = useCallback((entry) => {
     setResult(entry);
@@ -116,6 +121,7 @@ export default function useAuthWorkspace() {
       return response;
     } catch (error) {
       if (!mounted.current || controller.signal.aborted) return null;
+      setFieldErrors(fieldErrorsFromResponse(error.response?.data));
       const details = describeRequestError(error, { online: globalThis.navigator?.onLine !== false });
       record(createActivityEntry(requestAction, details.status, performance.now() - start,
         error.response?.data || { message: details.message }));

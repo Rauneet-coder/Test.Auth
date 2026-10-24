@@ -210,3 +210,15 @@ test("a rejected session clears the in-memory access token before the next profi
     assert.deepEqual(authorization, ["Bearer expired-token", undefined]);
   } finally { setAccessToken(null); api.defaults.adapter = previous; }
 });
+
+test("server validation issues map only to known fields and retain the first useful error", async () => {
+  const { fieldErrorsFromResponse } = await import("../src/lib/workspace.js");
+  assert.deepEqual(fieldErrorsFromResponse({ errors: [
+    { field: "email", message: "Enter a valid email." },
+    { field: "email", message: "Another email issue." },
+    { field: "password", message: "Use an uppercase letter." },
+    { field: "__proto__", message: "invalid" }, null,
+    { field: "otp", message: 3 },
+  ] }), { email: "Enter a valid email.", password: "Use an uppercase letter." });
+  assert.deepEqual(fieldErrorsFromResponse({ errors: "unexpected" }), {});
+});

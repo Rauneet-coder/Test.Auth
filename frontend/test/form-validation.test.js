@@ -25,3 +25,14 @@ test("login accepts existing passwords without registration policy", () => {
   assert.equal(validation.validatePassword("old", false), "");
   assert.notEqual(validation.validatePassword("", false), "");
 });
+
+test("username length boundaries match the backend", () => {
+  assert.notEqual(validation.validateUsername("ab"), "");
+  assert.equal(validation.validateUsername("abc"), "");
+  assert.equal(validation.validateUsername("a".repeat(30)), "");
+  assert.notEqual(validation.validateUsername("a".repeat(31)), "");
+});
+test("username does not gain an unsupported character restriction", () => {
+  assert.equal(validation.validateUsername("Alex Morgan"), "");
+  assert.equal(validation.validateUsername("alex.morgan"), "");
+});

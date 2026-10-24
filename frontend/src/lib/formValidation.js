@@ -20,3 +20,9 @@ export function validatePassword(value = "", registration = false) {
   const missing = getPasswordRequirements(value).find(({ met }) => !met);
   return missing ? `Your password needs ${missing.label.toLowerCase()}.` : "";
 }
+
+export function validateUsername(value = "") {
+  if (value.length < 3) return "Use at least 3 characters for your username.";
+  if (value.length > 30) return "Keep your username to 30 characters or fewer.";
+  return "";
+}

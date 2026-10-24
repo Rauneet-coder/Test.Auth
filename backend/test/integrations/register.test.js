@@ -134,5 +134,8 @@ describe("POST /api/auth/register", () => {
     it("should securely hash password with bcrypt and never store plaintext in database", async () => {
         const savedUser = await Usermodel.findOne({ email: validUser.email });
         expect(savedUser).toBeDefined();
+
+        // 1. Password must NEVER equal the plaintext password
+        expect(savedUser.password).not.toBe(validUser.password);
     });
 });

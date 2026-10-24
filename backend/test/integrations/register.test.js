@@ -70,4 +70,8 @@ describe("POST /api/auth/register", () => {
         expect(response.statusCode).toBe(409);
         expect(response.body).toHaveProperty("message", "User already exists");
     });
+
+    // ─── P0: Invalid registration data (Validation errors) ───────────────────
+    describe("Validation Errors", () => {
+    });
 });

@@ -123,3 +123,9 @@ button.activity-row.activity-row-selected { background: #f0f5e9; box-shadow: ins
 .activity-empty-state h3 { font-size: 12px; font-weight: 600; color: #7d8d6f; margin: 0 0 6px; }
 .activity-empty-state p { font-size: 10px; line-height: 1.8; color: #a0ad91; max-width: 330px; margin: 0 auto; }
 .activity-empty-state .inspector-button { margin-top: 14px; font-size: 10px; min-height: 32px; padding: 6px 10px; }
+.activity-heading-actions { display: flex; align-items: center; gap: 15px; }
+.activity-clear-confirm { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 15px 18px; margin: 0 0 14px; border: 1px solid #ede1d3; background: #fdf9f4; border-radius: 9px; }
+.activity-clear-confirm h3 { font-size: 12px; margin: 0; color: #775a40; font-weight: 600; }
+.activity-clear-confirm p { font-size: 10px; line-height: 1.7; margin: 5px 0 0; color: #99826b; }
+.activity-clear-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.activity-clear-actions .inspector-button { min-height: 32px; font-size: 10px; padding: 6px 10px; }

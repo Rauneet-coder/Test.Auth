@@ -19,6 +19,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
   const [editedFields, setEditedFields] = useState({});
   useEffect(() => { setEditedFields({}); }, [errors]);
   const handleSubmit = (event) => {
+    if (busy) { event.preventDefault(); return; }
     const nextErrors = validateForm(mode, fields);
     setClientErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
@@ -35,12 +36,14 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
     setClientErrors((previous) => ({ ...previous, [name]: "" }));
     setEditedFields((previous) => ({ ...previous, [name]: true }));
   };
+  const ownPending = busy === (mode === "verify" ? "verifyEmail" : mode);
+  const pendingLabel = mode === "register" ? "Creating account…" : mode === "verify" ? "Verifying email…" : "Signing in…";
   const field = (name, label, type = "text") => (
     <AuthField key={name} id={`${formId}-${name}`} name={name} label={label} type={name === "password" && showPassword ? "text" : type}
       trailing={name === "password" && <button className="auth-password-toggle" type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} disabled={!!busy} onClick={() => setShowPassword((previous) => !previous)}>{showPassword ? "Hide" : "Show"}</button>}
       inputRef={(element) => { fieldRefs.current[name] = element; }}
       error={clientErrors[name] || (!editedFields[name] && errors[name]) || undefined}
-      value={fields[name] || ""} onChange={(event) => updateField(name, event.target.value)} required
+      value={fields[name] || ""} onChange={(event) => updateField(name, event.target.value)} required disabled={!!busy}
       autoComplete={name === "password" ? (mode === "register" ? "new-password" : "current-password") : name === "otp" ? "one-time-code" : name}
       autoCapitalize="none" spellCheck={false}
       onKeyDown={name === "password" ? checkCapsLock : undefined}
@@ -59,13 +62,16 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
         <h2 id={`${formId}-title`}>{titles[mode]}</h2>
         <p>A secure place to get started.</p>
       </div>
-      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+      <form className="auth-form" onSubmit={handleSubmit} noValidate aria-busy={!!busy}>
         {mode === "register" && field("username", "Username")}
         {field("email", "Email address", "email")}
         {mode === "verify" ? <OtpField id={`${formId}-otp`} value={fields.otp || ""} onChange={(value) => updateField("otp", value)} inputRef={(element) => { fieldRefs.current.otp = element; }} error={clientErrors.otp || (!editedFields.otp && errors.otp) || undefined} disabled={!!busy} /> : field("password", "Password", "password")}
         {mode !== "verify" && capsLock && <p className="auth-caps-hint" role="status">Caps Lock is on. Passwords are case-sensitive.</p>}
         {mode === "register" && <PasswordChecklist value={fields.password || ""} />}
-        <button className="auth-submit" type="submit">{mode === "register" ? "Create account" : mode === "verify" ? "Verify email" : "Sign in"}</button>
+        <button className="auth-submit" type="submit" disabled={!!busy}>
+          {busy && <span className="auth-spinner" aria-hidden="true" />}
+          {busy ? (ownPending ? pendingLabel : "Request in progress…") : mode === "register" ? "Create account" : mode === "verify" ? "Verify email" : "Sign in"}
+        </button>
       </form>
       </div>
     </section>

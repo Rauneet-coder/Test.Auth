@@ -45,3 +45,8 @@
 
 .auth-label-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .auth-clear-code { color:var(--auth-primary); background:transparent; border:0; padding:0 3px; min-height:28px; font:inherit; font-size:12px; font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+
+.auth-form-panel button:disabled { cursor:wait; opacity:.6; }
+.auth-input:disabled { background:#f5f7f5; color:#64716a; cursor:wait; }
+.auth-spinner { width:16px; height:16px; flex-shrink:0; border:2px solid #ffffff60; border-top-color:#fff; border-radius:50%; animation:auth-spin .75s linear infinite; }
+@keyframes auth-spin { to { transform:rotate(360deg); } }

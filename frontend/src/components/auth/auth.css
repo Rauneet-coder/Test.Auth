@@ -35,3 +35,10 @@
 .auth-caps-hint { display:flex; margin:-10px 0 0; color:#79521a; background:#fff9ed; border:1px solid #f0e2c2; border-radius:7px; padding:9px 11px; font-size:12px; line-height:1.5; }
 
 .auth-otp-input { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:24px; letter-spacing:.65em; text-align:center; }
+
+.auth-otp-entry { position:relative; height:54px; }
+.auth-otp-slots { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:9px; height:100%; pointer-events:none; }
+.auth-otp-slot { display:grid; place-items:center; min-width:0; height:54px; border:1px solid var(--auth-border); border-radius:9px; background:#fff; color:var(--auth-ink); font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:23px; font-weight:500; }
+.auth-otp-entry .auth-otp-input { position:absolute; inset:0; height:100%; opacity:0; cursor:text; }
+.auth-otp-entry:focus-within .auth-otp-active { border-color:var(--auth-primary); box-shadow:0 0 0 3px #235c461c; background:#f7fbf8; }
+.auth-otp-invalid .auth-otp-slot { border-color:#bf4e54; }

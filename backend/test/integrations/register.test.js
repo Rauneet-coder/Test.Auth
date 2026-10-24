@@ -1,20 +1,16 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
-import mongoose from "mongoose";
 import app from "../../src/app.js";
-import connectDB from "../../src/config/database.js";
 import Usermodel from "../../src/models/user.model.js";
 
 describe("POST /api/auth/register", () => {
     beforeAll(async () => {
-        await connectDB();
         // Clean up test user so test is repeatable
         await Usermodel.deleteOne({ email: "unique.testuser@example.com" });
     });
 
     afterAll(async () => {
         await Usermodel.deleteOne({ email: "unique.testuser@example.com" });
-        await mongoose.connection.close();
     });
 
     it("should return 201 if user is registered successfully", async () => {

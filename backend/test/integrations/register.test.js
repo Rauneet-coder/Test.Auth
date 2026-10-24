@@ -57,4 +57,17 @@ describe("POST /api/auth/register", () => {
         expect(response.statusCode).toBe(409);
         expect(response.body).toHaveProperty("message", "User already exists");
     });
+
+    it("should return 409 if username already exists", async () => {
+        const response = await request(app)
+            .post("/api/auth/register")
+            .send({
+                username: validUser.username,
+                email: "another.user@example.com",
+                password: "SecurePassword123!"
+            });
+
+        expect(response.statusCode).toBe(409);
+        expect(response.body).toHaveProperty("message", "User already exists");
+    });
 });

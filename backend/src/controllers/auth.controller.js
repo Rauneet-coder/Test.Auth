@@ -138,7 +138,7 @@ export const refreshToken = (async (req, res) => {
     try {
         decoded = jwt.verify(refreshToken, config.JWT_SECRET);
     } catch (_err) {
-        throw _err;
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 
     const oldRefreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex")

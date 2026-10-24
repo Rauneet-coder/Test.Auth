@@ -41,3 +41,23 @@ export function payloadForAction(action, fields = {}) {
   }
   return undefined;
 }
+
+const sensitiveKey = /token|password|passwd|secret|authorization|cookie|otp|verification.?code/i;
+const jwtPattern = /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g;
+
+/** Return a display-safe copy; the original response remains available to auth logic. */
+export function redactData(data) {
+  const seen = new WeakSet();
+  function visit(value, depth) {
+    if (typeof value === "string") return value.replace(jwtPattern, "[hidden]");
+    if (value === null || typeof value !== "object") return value;
+    if (seen.has(value)) return "[circular]";
+    if (depth > 20) return "[nested output omitted]";
+    seen.add(value);
+    if (Array.isArray(value)) return value.map((item) => visit(item, depth + 1));
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [
+      key, sensitiveKey.test(key) ? "[hidden]" : visit(item, depth + 1),
+    ]));
+  }
+  return visit(data, 0);
+}

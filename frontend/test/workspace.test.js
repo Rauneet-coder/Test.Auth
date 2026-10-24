@@ -25,3 +25,18 @@ test("payloads preserve email case, password spaces, and verification leading ze
   assert.deepEqual(payloadForAction("verifyEmail", fields), { email: "Alex@Example.com", otp: "012345" });
   assert.equal(payloadForAction("getMe", fields), undefined);
 });
+
+test("activity redaction deeply hides credentials without mutating API responses", async () => {
+  const { redactData } = await import("../src/lib/workspace.js");
+  const response = { accessToken: "sensitive", user: { email: "Alex@example.com" }, nested: [{ password: "secret", OTP: "001234", authorization: "Bearer secret" }], message: "eyJhbGciOiJub25lIn0.eyJleHAiOjF9.signature" };
+  const safe = redactData(response);
+  assert.equal(safe.accessToken, "[hidden]");
+  assert.equal(safe.nested[0].OTP, "[hidden]");
+  assert.equal(safe.nested[0].password, "[hidden]");
+  assert.equal(safe.nested[0].authorization, "[hidden]");
+  assert.equal(safe.message, "[hidden]");
+  assert.equal(response.nested[0].password, "secret");
+  assert.equal(safe.user.email, "Alex@example.com");
+  const cycle = {}; cycle.self = cycle;
+  assert.equal(redactData(cycle).self, "[circular]");
+});

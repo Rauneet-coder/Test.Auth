@@ -71,10 +71,63 @@ describe("POST /api/auth/login", () => {
         expect(response.body).toEqual({ message: "Email not verified" });
     });
 
-    it("should return 400 if email or password are missing", async () => {
+    // ─── P0: Login with verified user ────────────────────────────────────────
+    it("should return access token and set refresh cookie for verified user", async () => {
+        const response = await request(app)
+            .post("/api/auth/login")
+            .set("User-Agent", "supertest-agent")
+            .send({
+                email: verifiedUser.email,
+                password: verifiedUser.password
+            });
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toHaveProperty("message", "User logged in successfully");
+        expect(response.body).toHaveProperty("accessToken");
+        expect(typeof response.body.accessToken).toBe("string");
+        expect(response.body.user.email).toBe(verifiedUser.email);
+        expect(response.body.user.username).toBe(verifiedUser.username);
+
+        const setCookie = response.headers["set-cookie"];
+        expect(setCookie).toBeDefined();
+        const refreshCookie = setCookie.find((c) => c.startsWith("refreshToken="));
+        expect(refreshCookie).toBeDefined();
+        expect(refreshCookie).toContain("HttpOnly");
+    });
+
+    // ─── Negative: Validation & Non-existent User ─────────────────────────────
+    it("should return 400 validation error if email or password are missing", async () => {
         const response = await request(app)
             .post("/api/auth/login")
             .send({});
+
         expect(response.statusCode).toBe(400);
+        expect(response.body).toHaveProperty("errors");
     });
+
+    it("should return 400 validation error if email format is invalid", async () => {
+        const response = await request(app)
+            .post("/api/auth/login")
+            .send({
+                email: "invalid-email-format",
+                password: "SomePassword123!"
+            });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toHaveProperty("errors");
+    });
+
+    it("should reject login if user does not exist", async () => {
+        const response = await request(app)
+            .post("/api/auth/login")
+            .send({
+                email: "nonexistent.user@example.com",
+                password: "SomePassword123!"
+            });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({ message: "User not found" });
+    });
+
+
 });

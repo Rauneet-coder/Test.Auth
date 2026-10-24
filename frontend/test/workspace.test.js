@@ -56,3 +56,35 @@ test("activity keeps 50 newest entries with unique IDs and ISO timestamps", asyn
   assert.equal(history[0].path, "/api/auth/login");
   assert.equal(history[0].data.accessToken, "[hidden]");
 });
+
+test("a synchronous request lock prevents duplicate requests before React rerenders", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { default: useAuthWorkspace } = await import("../src/hooks/useAuthWorkspace.js");
+  const { default: api } = await import("../src/services/api.js");
+  const previous = api.defaults.adapter;
+  let dispatches = 0;
+  let workspace;
+  let release;
+  const pending = new Promise((resolve) => { release = resolve; });
+  api.defaults.adapter = async (config) => {
+    dispatches++;
+    await pending;
+    return { status: 200, data: { message: "Signed out" }, config };
+  };
+  function Probe() { workspace = useAuthWorkspace(); return null; }
+  try {
+    renderToStaticMarkup(createElement(Probe));
+    const first = workspace.run("logout");
+    const duplicate = await workspace.run("logout");
+    assert.equal(duplicate, null);
+    release();
+    await first;
+    assert.equal(dispatches, 1);
+    await workspace.run("logout");
+    assert.equal(dispatches, 2, "lock releases after completion");
+  } finally {
+    release();
+    api.defaults.adapter = previous;
+  }
+});

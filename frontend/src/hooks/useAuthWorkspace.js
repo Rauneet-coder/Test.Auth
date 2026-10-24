@@ -1,10 +1,11 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { authApi, describeRequestError } from "../services/api.js";
 import {
   appendActivity, createActivityEntry, getAction, modeFromPath, payloadForAction,
 } from "../lib/workspace.js";
 
 export default function useAuthWorkspace() {
+  const inFlight = useRef(false);
   const [mode, setMode] = useState(() => modeFromPath(globalThis.location?.pathname));
   const [fields, setFields] = useState({ username: "", email: "", password: "", otp: "" });
   const [fieldErrors, setFieldErrors] = useState({});
@@ -32,8 +33,9 @@ export default function useAuthWorkspace() {
   }, []);
 
   const run = useCallback(async (action, payload) => {
-    if (busy) return null;
+    if (inFlight.current) return null;
     getAction(action);
+    inFlight.current = true;
     setBusy(action);
     setNotice(null);
     setFieldErrors({});
@@ -50,9 +52,10 @@ export default function useAuthWorkspace() {
       setNotice({ type: "error", message: details.message });
       return null;
     } finally {
+      inFlight.current = false;
       setBusy("");
     }
-  }, [busy, record]);
+  }, [record]);
 
   const submit = useCallback((event) => {
     event?.preventDefault();

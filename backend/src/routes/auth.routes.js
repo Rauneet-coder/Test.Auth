@@ -3,6 +3,7 @@ import * as authController from "../controllers/auth.controller.js";
 import { validate } from "../middlewares/validate.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { RegisterSchema, LoginSchema, VerifyOtpSchema } from "../Validators/auth.validator.js";
+import { authRateLimiter } from "../middlewares/rateLimiter.js";
 
 
 const authRouter = Router();

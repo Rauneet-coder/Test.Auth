@@ -61,3 +61,19 @@ export function redactData(data) {
   }
   return visit(data, 0);
 }
+
+let entrySequence = 0;
+export function createActivityEntry(action, status, duration, data, now = new Date()) {
+  const { method, path } = getAction(action);
+  return {
+    id: `${now.getTime()}-${++entrySequence}`,
+    action, method, path, status,
+    duration: Number.isFinite(duration) ? Math.max(0, Math.round(duration)) : 0,
+    data: redactData(data),
+    time: now.toISOString(),
+  };
+}
+
+export function appendActivity(history, entry) {
+  return [entry, ...history].slice(0, 50);
+}

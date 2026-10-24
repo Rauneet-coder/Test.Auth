@@ -40,3 +40,19 @@ test("activity redaction deeply hides credentials without mutating API responses
   const cycle = {}; cycle.self = cycle;
   assert.equal(redactData(cycle).self, "[circular]");
 });
+
+test("activity keeps 50 newest entries with unique IDs and ISO timestamps", async () => {
+  const { createActivityEntry, appendActivity } = await import("../src/lib/workspace.js");
+  const now = new Date("2026-10-24T10:00:00.000Z");
+  let history = [];
+  for (let index = 0; index < 60; index++) {
+    history = appendActivity(history, createActivityEntry("login", 200, 12.7, { accessToken: "secret", index }, now));
+  }
+  assert.equal(history.length, 50);
+  assert.equal(new Set(history.map(({ id }) => id)).size, 50);
+  assert.equal(history[0].data.index, 59);
+  assert.equal(history[0].duration, 13);
+  assert.equal(history[0].time, now.toISOString());
+  assert.equal(history[0].path, "/api/auth/login");
+  assert.equal(history[0].data.accessToken, "[hidden]");
+});

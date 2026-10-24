@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Brand from './Brand';
 import Icon from '../Icon';
-import { workspaceViews } from './Sidebar';
+import { workspaceViews } from './navigation';
 
 export default function MobileNavigation({ open, onClose, view, onNavigate, onHelp }) {
   const dialog = useRef(null);

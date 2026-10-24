@@ -1,11 +1,8 @@
 import Brand from './Brand';
 import Icon from '../Icon';
 
-export const workspaceViews = [
-  { id: 'authentication', label: 'Authentication', icon: 'shield' },
-  { id: 'activity', label: 'Request activity', icon: 'activity' },
-  { id: 'guide', label: 'API reference', icon: 'code' },
-];
+import { workspaceViews } from './navigation';
+
 
 export default function Sidebar({ view, onNavigate, requestCount = 0, onHelp, collapsed = false, onToggle }) {
   return <aside className="workspace-sidebar" aria-label="Workspace sidebar">

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Icon from '../Icon';
 
-export const apiGuideEntries = [
+const apiGuideEntries = [
   { action: 'register', title: 'Create an account', method: 'POST', path: '/register', description: 'Create an account and send a six-digit verification code by email.', body: '{ "username": "your-name", "email": "you@example.com", "password": "your-password" }', note: 'Passwords require 8+ characters, an uppercase letter, a number, and a symbol. Registration does not sign you in.' },
   { action: 'verifyEmail', title: 'Verify your email', method: 'POST', path: '/verify-email', description: 'Confirm your email address using the code in your inbox.', body: '{ "email": "you@example.com", "otp": "012345" }', note: 'Codes expire after five minutes. Keep any leading zeroes. There is currently no resend endpoint.' },
   { action: 'login', title: 'Sign in', method: 'POST', path: '/login', description: 'Sign in to a verified account and start a session.', body: '{ "email": "you@example.com", "password": "your-password" }', note: 'The access token stays in memory. The browser manages the HttpOnly refresh cookie.' },

@@ -7,3 +7,9 @@ export function workspaceViewUrl(pathname, view) {
   const path = ['/login', '/register', '/verify', '/'].includes(pathname) ? pathname : '/login';
   return `${path}${view === 'authentication' || !viewNames.includes(view) ? '' : `#${view}`}`;
 }
+
+export const workspaceViews = [
+  { id: 'authentication', label: 'Authentication', icon: 'shield' },
+  { id: 'activity', label: 'Request activity', icon: 'activity' },
+  { id: 'guide', label: 'API reference', icon: 'code' },
+];

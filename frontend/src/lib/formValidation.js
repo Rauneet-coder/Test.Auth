@@ -1,7 +1,8 @@
 /** Keep the entered account identifier case; the backend uses exact lookup. */
 export function validateEmail(value = "") {
-  if (!String(value).trim()) return "Enter your email address.";
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+  const identifier = String(value).trim();
+  if (!identifier) return "Enter your email address.";
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)
     ? "" : "Enter a valid email address, such as you@example.com.";
 }
 
@@ -22,8 +23,9 @@ export function validatePassword(value = "", registration = false) {
 }
 
 export function validateUsername(value = "") {
-  if (value.length < 3) return "Use at least 3 characters for your username.";
-  if (value.length > 30) return "Keep your username to 30 characters or fewer.";
+  const username = String(value).trim();
+  if (username.length < 3) return "Use at least 3 characters for your username.";
+  if (username.length > 30) return "Keep your username to 30 characters or fewer.";
   return "";
 }
 

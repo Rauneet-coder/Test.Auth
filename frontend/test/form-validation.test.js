@@ -5,10 +5,17 @@ import * as validation from "../src/lib/formValidation.js";
 test("email accepts mixed case and plus addressing", () => {
   assert.equal(validation.validateEmail("Test.User+news@Example.com"), "");
 });
-test("email rejects blank, malformed, and whitespace-padded identifiers", () => {
-  for (const value of ["", "   ", "someone", "a@@example.com", "a b@example.com", " a@example.com "]) {
+test("email rejects blank, malformed, and internally spaced identifiers", () => {
+  for (const value of ["", "   ", "someone", "a@@example.com", "a b@example.com"]) {
     assert.notEqual(validation.validateEmail(value), "", value);
   }
+});
+test("validation checks the same trimmed identifiers that transport sends", () => {
+  assert.equal(validation.validateEmail(" Alex@Example.com "), "");
+  assert.equal(validation.validateUsername(" Alex Morgan "), "");
+  assert.notEqual(validation.validateUsername("  a"), "");
+  assert.notEqual(validation.validateUsername("   "), "");
+  assert.equal(validation.validateUsername(` ${"a".repeat(30)} `), "");
 });
 
 test("registration matches backend policy without inventing lowercase requirements", () => {

@@ -56,6 +56,15 @@ test("OTP requires exactly six ASCII digits", () => {
   }
 });
 
+test("OTP navigation selects a replaceable digit even when all six slots are filled", () => {
+  assert.deepEqual(validation.otpSelectionForKey("ArrowLeft", 6, 6), { start: 5, end: 6 });
+  assert.deepEqual(validation.otpSelectionForKey("Home", 6, 6), { start: 0, end: 1 });
+  assert.deepEqual(validation.otpSelectionForKey("End", 0, 6), { start: 5, end: 6 });
+  assert.deepEqual(validation.otpSelectionForKey("ArrowRight", 2, 3), { start: 3, end: 3 });
+  assert.deepEqual(validation.otpSelectionForKey("ArrowLeft", 0, 0), { start: 0, end: 0 });
+  assert.equal(validation.otpSelectionForKey("Tab", 0, 6), null);
+});
+
 test("each mode requires only the fields used by its endpoint", () => {
   assert.deepEqual(validation.validateForm("login", { email: "a@example.com", password: "old" }), {});
   assert.deepEqual(validation.validateForm("verify", { email: "a@example.com", otp: "012345" }), {});

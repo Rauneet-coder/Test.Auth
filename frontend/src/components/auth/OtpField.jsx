@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { normalizeOtp } from "../../lib/formValidation";
+import { normalizeOtp, otpSelectionForKey } from "../../lib/formValidation";
 
 export default function OtpField({ id, value = "", onChange, error, disabled, inputRef }) {
   const inputElement = useRef(null);
@@ -19,6 +19,14 @@ export default function OtpField({ id, value = "", onChange, error, disabled, in
     const code = normalizeOtp(event.clipboardData.getData("text"));
     if (code) onChange(code);
   };
+  const handleKeyDown = (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+    const selection = otpSelectionForKey(event.key, event.currentTarget.selectionStart || 0, value.length);
+    if (!selection) return;
+    event.preventDefault();
+    event.currentTarget.setSelectionRange(selection.start, selection.end);
+    setActiveSlot(selection.start);
+  };
   return (
     <div className={`auth-field${error ? " auth-field-invalid" : ""}`}>
       <div className="auth-label-row">
@@ -31,7 +39,7 @@ export default function OtpField({ id, value = "", onChange, error, disabled, in
       </div>
       <input ref={(element) => { inputElement.current = element; inputRef?.(element); }} className="auth-input auth-otp-input" id={id} name="otp" type="text"
         inputMode="numeric" autoComplete="one-time-code" autoCapitalize="none" spellCheck={false}
-        value={value} onChange={(event) => onChange(normalizeOtp(event.target.value))} onPaste={handlePaste}
+        value={value} onChange={(event) => onChange(normalizeOtp(event.target.value))} onPaste={handlePaste} onKeyDown={handleKeyDown}
         onFocus={trackSelection} onSelect={trackSelection} onBlur={() => setActiveSlot(-1)} onPointerDown={handlePointerDown}
         maxLength={6} required disabled={disabled} aria-invalid={error ? true : undefined}
         aria-describedby={[`${id}-hint`, error && `${id}-error`].filter(Boolean).join(" ")} />

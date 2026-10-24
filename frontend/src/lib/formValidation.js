@@ -37,6 +37,13 @@ export function validateOtp(value = "") {
   return /^[0-9]{6}$/.test(value) ? "" : "Enter all 6 digits from your verification email.";
 }
 
+export function otpSelectionForKey(key, start, length) {
+  const positions = { ArrowLeft: start - 1, ArrowRight: start + 1, Home: 0, End: Math.max(0, length - 1) };
+  if (!Object.hasOwn(positions, key)) return null;
+  const index = Math.max(0, Math.min(5, length, positions[key]));
+  return { start: index, end: Math.min(index + 1, length) };
+}
+
 export function validateForm(mode, fields = {}) {
   const errors = {};
   const checks = { email: validateEmail(fields.email) };

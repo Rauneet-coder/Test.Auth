@@ -1,0 +1,27 @@
+/** The playground intentionally exposes only the backend's seven auth routes. */
+export const AUTH_ACTIONS = Object.freeze({
+  login: { method: "POST", path: "/api/auth/login" },
+  register: { method: "POST", path: "/api/auth/register" },
+  verifyEmail: { method: "POST", path: "/api/auth/verify-email" },
+  refreshToken: { method: "POST", path: "/api/auth/refresh-token" },
+  logout: { method: "POST", path: "/api/auth/logout" },
+  logoutAll: { method: "POST", path: "/api/auth/logout-all" },
+  getMe: { method: "GET", path: "/api/auth/me" },
+});
+
+export function getAction(action) {
+  if (!Object.hasOwn(AUTH_ACTIONS, action)) {
+    throw new Error("Choose a supported authentication action.");
+  }
+  return AUTH_ACTIONS[action];
+}
+
+export function modeFromPath(pathname) {
+  if (pathname === "/register" || pathname === "/register/") return "register";
+  if (pathname === "/verify" || pathname === "/verify/") return "verify";
+  return "login";
+}
+
+export function pathFromMode(mode) {
+  return mode === "register" ? "/register" : mode === "verify" ? "/verify" : "/login";
+}

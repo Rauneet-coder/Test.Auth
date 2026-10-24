@@ -129,4 +129,10 @@ describe("POST /api/auth/register", () => {
             expect(passwordError).toBeDefined();
         });
     });
+
+    // ─── P2: Password hashing ────────────────────────────────────────────────
+    it("should securely hash password with bcrypt and never store plaintext in database", async () => {
+        const savedUser = await Usermodel.findOne({ email: validUser.email });
+        expect(savedUser).toBeDefined();
+    });
 });

@@ -6,12 +6,22 @@ import Usermodel from "../../src/models/user.model.js";
 
 describe("POST /api/auth/register", () => {
     beforeAll(async () => {
-        // Clean up test user so test is repeatable
-        await Usermodel.deleteOne({ email: "unique.testuser@example.com" });
+        await Usermodel.deleteMany({
+            $or: [
+                { email: "unique.testuser@example.com" },
+                { username: "uniqueuser123" }
+            ]
+        });
     });
 
     afterAll(async () => {
-        await Usermodel.deleteOne({ email: "unique.testuser@example.com" });
+        await Usermodel.deleteMany({
+            $or: [
+                { email: "unique.testuser@example.com" },
+                { username: "uniqueuser123" },
+                { email: "another.user@example.com" }
+            ]
+        });
     });
 
     it("should return 201 if user is registered successfully", async () => {

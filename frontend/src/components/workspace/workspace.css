@@ -37,3 +37,24 @@
 .workspace-icon-button { display: inline-grid; place-items: center; width: 36px; min-height: 36px; border-radius: 7px; border: 0; color: var(--muted); background: transparent; }
 .workspace-icon-button:hover { color: var(--accent); background: var(--mint); }
 .workspace-menu-button { display: none; }
+.workspace-showcase { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; padding: 34px 32px 26px; color: #fff; background: #173f32; border-radius: 11px; }
+.workspace-showcase-top { display: flex; align-items: center; justify-content: space-between; }
+.workspace-showcase-badge { display: inline-flex; align-items: center; gap: 7px; color: #d0e3d5; font-size: 9px; font-weight: 550; letter-spacing: 1.1px; }
+.workspace-showcase-plus { color: #c3dd9e; font-size: 25px; line-height: 1; }
+.workspace-showcase h2 { position: relative; z-index: 1; margin: 30px 0 14px; font: 550 clamp(25px, 2.5vw, 38px)/1.26 var(--font-display); letter-spacing: -1.5px; }
+.workspace-showcase h2 span { color: #c5dda9; }
+.workspace-showcase > p { margin: 0; color: #c0d3c7; font-size: 12px; line-height: 1.8; }
+.workspace-security-art { position: relative; width: 286px; height: 232px; max-width: 100%; margin: 8px auto 0; }
+.workspace-art-grid { position: absolute; inset: 0 -40px; opacity: .28; background-image: radial-gradient(#85aa93 1px, transparent 1px); background-size: 18px 18px; mask-image: radial-gradient(ellipse, #000 10%, transparent 70%); }
+.workspace-orbit { position: absolute; left: 50%; top: 50%; aspect-ratio: 1; border: 1px solid #87b49a29; border-radius: 50%; transform: translate(-50%,-50%); }
+.orbit-outer { width: 252px; }.orbit-middle { width: 196px; }.orbit-inner { width: 140px; background: #c7e2b905; }
+.workspace-art-shield { position: absolute; left: 50%; top: 50%; display: grid; place-items: center; width: 92px; height: 105px; color: #d7efb5; background: #36664c; border: 1px solid #81a778; border-radius: 25px; box-shadow: 0 14px 35px #071e2680, inset 0 2px #d9f1b323; transform: translate(-50%,-50%) rotate(-7deg); }
+.workspace-art-shield svg { transform: rotate(7deg); }
+.workspace-art-chip { position: absolute; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #6d937a; border-radius: 12px; background: #244e3d; color: #bdd7c0; box-shadow: 0 5px 10px #0d2a3060; }
+.chip-mail { top: 40px; left: 28px; transform: rotate(-12deg); }.chip-lock { right: 21px; bottom: 40px; transform: rotate(12deg); }
+.workspace-art-check { position: absolute; top: 52px; right: 60px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #d3e9b5; color: #245338; border: 4px solid #173f32; }
+.workspace-art-spark { position: absolute; color: #accb8e; font-size: 20px; }.spark-one { top: 15px; left: 147px; }.spark-two { bottom: 20px; left: 53px; font-size: 14px; }
+.workspace-orbit-dot { position: absolute; top: 114px; right: 19px; width: 5px; height: 5px; border-radius: 50%; background: #adc694; }
+.workspace-showcase-bottom { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 16px; border-top: 1px solid #ffffff1a; }
+.workspace-avatar-stack { display: flex; padding-right: 3px; }.workspace-avatar-stack span { display: grid; place-items: center; width: 23px; height: 23px; margin-right: -6px; border: 2px solid #173f32; border-radius: 50%; background: #a8b99a; color: #234034; font-size: 8px; font-weight: 700; }.workspace-avatar-stack span:nth-child(2) { background: #dfc0a4; }.workspace-avatar-stack span:nth-child(3) { background: #b6c3d7; }
+.workspace-showcase-bottom strong { display: block; font-size: 10px; font-weight: 500; }.workspace-showcase-bottom div > span { display: block; margin-top: 4px; font-size: 9px; color: #c0d3c7; }

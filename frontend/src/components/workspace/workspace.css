@@ -65,3 +65,15 @@
 .workspace-journey .is-current > span { background: var(--accent); color: #fff; border-color: var(--accent); }
 .workspace-journey .is-complete > span { background: var(--mint); border-color: #c7dec9; }
 .workspace-journey i { display: inline-block; width: 28px; height: 1px; margin-left: 9px; background: var(--line); }
+.workspace-api-guide { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 25px; }
+.workspace-section-title { display: flex; align-items: center; gap: 11px; margin-bottom: 22px; }
+.workspace-section-icon { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 10px; color: var(--accent); background: var(--surface-soft); }
+.workspace-section-title h2 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -.3px; }.workspace-section-title p { margin: 5px 0 0; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.workspace-small-badge { margin-left: auto; padding: 5px 8px; border: 1px solid var(--line); border-radius: 5px; font-size: 9px; font-weight: 550; color: var(--muted); letter-spacing: .5px; white-space: nowrap; }
+.workspace-guide-note { display: flex; align-items: center; gap: 9px; padding: 13px; border: 1px solid #d6e5d5; background: var(--mint); border-radius: 8px; font-size: 12px; color: var(--accent); line-height: 1.6; }.workspace-guide-note svg { flex-shrink: 0; }.workspace-guide-note code { font-size: 11px; }
+.workspace-endpoints { margin-top: 19px; }.workspace-endpoint { border-bottom: 1px solid var(--line); }.workspace-endpoint:last-child { border-bottom: 0; }
+.workspace-endpoint summary { display: flex; align-items: center; gap: 14px; min-height: 67px; cursor: pointer; list-style: none; }.workspace-endpoint summary::-webkit-details-marker { display: none; }.workspace-endpoint summary > code { color: var(--ink); font-size: 12px; }.workspace-endpoint summary > svg { margin-left: auto; color: var(--muted); transition: transform .15s; }.workspace-endpoint[open] summary > svg { transform: rotate(180deg); }
+.workspace-method { display: inline-block; min-width: 43px; padding: 5px 6px; border-radius: 5px; color: #2e6a47; background: #eaf4e8; font-size: 9px; font-weight: 700; text-align: center; }.method-get { color: #416aa1; background: #eaf0fa; }
+.workspace-endpoint-title { margin-left: auto; color: var(--muted); font-size: 12px; }.workspace-endpoint-body { padding: 0 0 20px 57px; font-size: 13px; line-height: 1.8; }.workspace-endpoint-body > p:first-child { margin-top: 0; }.workspace-endpoint-note { color: var(--muted); font-size: 12px; }.workspace-endpoint pre { margin: 14px 0; padding: 16px; border: 1px solid var(--line); border-radius: 8px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; background: var(--surface-soft); }
+.workspace-text-link { display: inline-flex; align-items: center; gap: 8px; padding: 6px 0; border: 0; background: transparent; color: var(--accent); font: 600 12px var(--font-body); }
+.workspace-guide-bottom { margin: 20px 0 0; padding-top: 17px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.8; }

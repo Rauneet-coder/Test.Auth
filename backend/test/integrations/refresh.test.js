@@ -57,6 +57,9 @@ describe("POST /api/auth/refresh-token", () => {
 
     // ─── Negative Test 2: Invalid or Corrupted Token ─────────────────────────
     it("should return 401 if refresh token is invalid or corrupted", async () => {
+        const response = await request(app)
+            .post("/api/auth/refresh-token")
+            .set("Cookie", ["refreshToken=invalid.corrupted.jwttoken"]);
     });
 
     // ─── Positive Test: Refresh Token & Rotation ─────────────────────────────

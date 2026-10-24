@@ -192,7 +192,12 @@ export const logout = (async (req, res) => {
     if (!refreshToken){
         return res.status(401).json({ message: "Already logout!" });
     }
-    const decoded = jwt.verify(refreshToken, config.JWT_SECRET);
+    let decoded;
+    try {
+        decoded = jwt.verify(refreshToken, config.JWT_SECRET);
+    } catch (_err) {
+        throw _err;
+    }
     const user = await Usermodel.findById(decoded.id);
     if (!user){
         return res.status(404).json({ message: "User not found" });

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authApi, describeRequestError, setAccessToken } from "../services/api.js";
 import {
-  appendActivity, createActivityEntry, fieldErrorsFromResponse, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction, profileFromResponse, tokenExpiresAt,
+  appendActivity, createActivityEntry, fieldErrorsFromResponse, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction, profileFromResponse, redactData, tokenExpiresAt,
 } from "../lib/workspace.js";
 
 export default function useAuthWorkspace() {
@@ -21,7 +21,13 @@ export default function useAuthWorkspace() {
   const [notice, setNotice] = useState(null);
   const [busy, setBusy] = useState("");
   const [history, setHistory] = useState([]);
-  const [result, setResult] = useState(null);
+  const [result, setResultState] = useState(null);
+  const setResult = useCallback((next) => {
+    setResultState((previous) => redactData(typeof next === "function" ? next(previous) : next));
+  }, []);
+  const dismissNotice = useCallback(() => setNotice(null), []);
+  const clearHistory = useCallback(() => setHistory([]), []);
+  const clearResult = useCallback(() => setResultState(null), []);
   const [user, setUser] = useState(null);
   const [sessionStatus, setSessionStatus] = useState("signed-out");
   const [online, setOnline] = useState(() => globalThis.navigator?.onLine !== false);
@@ -70,7 +76,7 @@ export default function useAuthWorkspace() {
     });
   }, []);
   const record = useCallback((entry) => {
-    setResult(entry);
+    setResultState(entry);
     setHistory((previous) => appendActivity(previous, entry));
   }, []);
 
@@ -166,9 +172,9 @@ export default function useAuthWorkspace() {
 
   return {
     mode, changeMode, fields, updateField, fieldErrors, notice,
-    dismissNotice: () => setNotice(null), busy, user, sessionStatus,
+    dismissNotice, busy, user, sessionStatus,
     history, result, setResult, run, submit,
-    clearHistory: () => setHistory([]), clearResult: () => setResult(null),
+    clearHistory, clearResult,
     online, expiresAt,
   };
 }

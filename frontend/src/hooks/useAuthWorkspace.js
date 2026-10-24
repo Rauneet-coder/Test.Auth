@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authApi, describeRequestError, setAccessToken } from "../services/api.js";
 import {
-  appendActivity, createActivityEntry, fieldErrorsFromResponse, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction, profileFromResponse, redactData, tokenExpiresAt,
+  appendActivity, createActivityEntry, fieldErrorsFromResponse, formAfterSuccess, getAction, modeFromPath, pathFromMode, payloadForAction, profileFromResponse, redactData, tokenExpiresAt, verificationRecovery,
 } from "../lib/workspace.js";
 
 export default function useAuthWorkspace() {
@@ -47,7 +47,7 @@ export default function useAuthWorkspace() {
     const safeMode = ["login", "register", "verify"].includes(next) ? next : "login";
     const path = pathFromMode(safeMode);
     if (globalThis.location && globalThis.location.pathname !== path) {
-      globalThis.history?.pushState(null, "", path);
+      globalThis.history?.pushState(null, "", `${path}${globalThis.location.search || ""}${globalThis.location.hash || ""}`);
     }
     setMode(safeMode);
     setFieldErrors({});
@@ -61,7 +61,7 @@ export default function useAuthWorkspace() {
     };
     const path = pathFromMode(modeFromPath(globalThis.location?.pathname));
     if (globalThis.location && globalThis.location.pathname !== path) {
-      globalThis.history?.replaceState(null, "", path);
+      globalThis.history?.replaceState(null, "", `${path}${globalThis.location.search || ""}${globalThis.location.hash || ""}`);
     }
     globalThis.addEventListener?.("popstate", onPopState);
     return () => globalThis.removeEventListener?.("popstate", onPopState);
@@ -95,10 +95,12 @@ export default function useAuthWorkspace() {
     setFieldErrors({});
     let start = performance.now();
     let requestAction = action;
+    const requestPayload = payloadForAction(action, payload);
+    const secrets = [requestPayload?.password, requestPayload?.otp];
     try {
-      const response = await authApi[action](payloadForAction(action, payload), { signal: controller.signal });
+      const response = await authApi[action](requestPayload, { signal: controller.signal });
       if (!mounted.current || controller.signal.aborted) return null;
-      record(createActivityEntry(action, response.status, performance.now() - start, response.data));
+      record(createActivityEntry(action, response.status, performance.now() - start, redactData(response.data, secrets)));
       if (action === "refreshToken") {
         setAccessToken(response.data.accessToken);
         setExpiresAt(tokenExpiresAt(response.data.accessToken));
@@ -115,7 +117,7 @@ export default function useAuthWorkspace() {
       if (action === "login" || action === "getMe") {
         if (action === "login") {
           setAccessToken(response.data.accessToken);
-        setExpiresAt(tokenExpiresAt(response.data.accessToken));
+          setExpiresAt(tokenExpiresAt(response.data.accessToken));
           setFields((previous) => formAfterSuccess(action, previous, response.data));
         }
         setUser(profileFromResponse(response.data));
@@ -140,23 +142,31 @@ export default function useAuthWorkspace() {
       }
       setNotice({ type: "success", message: action === "register"
         ? "Account created. Check your email for the verification code."
-        : action === "verifyEmail" ? "Email verified. You can sign in now." : response.data.message });
+        : action === "verifyEmail" ? "Email verified. You can sign in now." : redactData(response.data.message, secrets) });
       return response;
     } catch (error) {
       if (!mounted.current || controller.signal.aborted) return null;
-      setFieldErrors(fieldErrorsFromResponse(error.response?.data));
+      setFieldErrors(redactData(fieldErrorsFromResponse(error.response?.data), secrets));
       const details = describeRequestError(error, { online: globalThis.navigator?.onLine !== false });
       record(createActivityEntry(requestAction, details.status, performance.now() - start,
-        error.response?.data || { message: details.message }));
+        redactData(error.response?.data || { message: details.message }, secrets)));
       if (error.response?.status === 401) {
         setAccessToken(null);
         setExpiresAt(null);
         setUser(null);
         setSessionStatus("expired");
-      } else if (action === "refreshToken") {
+      } else if (action === "refreshToken" && requestAction === "getMe") {
         setSessionStatus("signed-out");
       }
-      setNotice({ type: "error", message: details.message });
+      const recovery = verificationRecovery(action, error, requestPayload);
+      if (recovery) {
+        setFields((previous) => ({ ...previous, ...recovery }));
+        setSessionStatus((previous) => previous === "signed-in" ? previous : "verification-pending");
+        changeMode("verify");
+      }
+      setNotice({ type: "error", message: recovery
+        ? "Your email needs verification. Enter the verification code from your inbox."
+        : redactData(details.message, secrets) });
       return null;
     } finally {
       inFlight.current = false;

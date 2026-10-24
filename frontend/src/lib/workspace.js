@@ -29,6 +29,7 @@ export function pathFromMode(mode) {
 /** Project fields explicitly so UI state and unrelated secrets never reach the API. */
 export function payloadForAction(action, fields = {}) {
   getAction(action);
+  fields = fields && typeof fields === "object" ? fields : {};
   const email = typeof fields.email === "string" ? fields.email.trim() : "";
   const password = typeof fields.password === "string" ? fields.password : "";
   if (action === "register") {
@@ -46,10 +47,16 @@ const sensitiveKey = /token|password|passwd|secret|authorization|cookie|otp|veri
 const jwtPattern = /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g;
 
 /** Return a display-safe copy; the original response remains available to auth logic. */
-export function redactData(data) {
+export function redactData(data, secrets = []) {
+  const credentials = [...new Set(secrets.filter((value) => typeof value === "string" && value.length > 0))]
+    .sort((left, right) => right.length - left.length);
   const seen = new WeakSet();
   function visit(value, depth) {
-    if (typeof value === "string") return value.replace(jwtPattern, "[hidden]");
+    if (typeof value === "string") {
+      let safe = value.replace(jwtPattern, "[hidden]").replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi, "Bearer [hidden]");
+      for (const secret of credentials) safe = safe.split(secret).join("[hidden]");
+      return safe;
+    }
     if (value === null || typeof value !== "object") return value;
     if (seen.has(value)) return "[circular]";
     if (depth > 20) return "[nested output omitted]";
@@ -116,4 +123,12 @@ export function tokenExpiresAt(token) {
   } catch {
     return null;
   }
+}
+
+
+export function verificationRecovery(action, error, payload) {
+  if (action !== "login" || error?.response?.status !== 400 ||
+      typeof error.response.data?.message !== "string" ||
+      error.response.data.message.trim().toLowerCase() !== "email not verified") return null;
+  return { email: payload.email, password: "", otp: "" };
 }

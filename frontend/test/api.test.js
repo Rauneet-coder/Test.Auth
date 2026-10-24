@@ -78,3 +78,8 @@ test("verification responses must explicitly confirm the account was verified", 
   data.user.verified = true;
   assert.equal(assertAuthResponse("verifyEmail", { status: 200, data }).data, data);
 });
+
+test("incomplete successful responses are recorded as invalid rather than successful", async () => {
+  const { describeRequestError } = await import("../src/services/api.js");
+  assert.equal(describeRequestError({ code: "INVALID_RESPONSE", message: "Incomplete", response: { status: 200 } }).status, "INVALID");
+});

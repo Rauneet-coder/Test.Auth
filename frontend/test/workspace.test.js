@@ -1,3 +1,4 @@
+/* oxlint-disable react/globals -- Server-rendered test probes capture hook controls without mounting a browser. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { AUTH_ACTIONS, getAction, modeFromPath, pathFromMode } from "../src/lib/workspace.js";
@@ -255,4 +256,50 @@ test("JWT expiry is optional display metadata that handles invalid and Unicode p
   assert.equal(tokenExpiresAt(token({ exp: 1e20 })), null);
   assert.equal(tokenExpiresAt(token({})), null);
   for (const value of [null, "opaque-token", "a.!.c", "a.b.c.d"]) assert.equal(tokenExpiresAt(value), null);
+});
+
+test("unverified login recovery retains the exact account email and discards stale secrets", async () => {
+  const { verificationRecovery } = await import("../src/lib/workspace.js");
+  const error = { response: { status: 400, data: { message: "Email not verified" } } };
+  assert.deepEqual(verificationRecovery("login", error, { email: "Alex@Example.com", password: "secret" }), {
+    email: "Alex@Example.com", password: "", otp: "",
+  });
+  assert.equal(verificationRecovery("register", error, { email: "Alex@Example.com" }), null);
+  assert.equal(verificationRecovery("login", { response: { status: 400, data: { message: "Invalid password" } } }, {}), null);
+});
+
+test("display redaction also removes credentials echoed inside ordinary messages", async () => {
+  const { redactData } = await import("../src/lib/workspace.js");
+  const safe = redactData({ message: "Password Secret123! and OTP 012345 were rejected. Bearer opaque-token", otp: "012345" }, ["Secret123!", "012345"]);
+  assert.equal(safe.message, "Password [hidden] and OTP [hidden] were rejected. Bearer [hidden]");
+  assert.equal(safe.otp, "[hidden]");
+});
+
+test("unverified login navigates to verification while preserving the current guide anchor", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { default: useAuthWorkspace } = await import("../src/hooks/useAuthWorkspace.js");
+  const { default: api } = await import("../src/services/api.js");
+  const previous = api.defaults.adapter;
+  const locationDescriptor = Object.getOwnPropertyDescriptor(globalThis, "location");
+  const historyDescriptor = Object.getOwnPropertyDescriptor(globalThis, "history");
+  const paths = [];
+  Object.defineProperty(globalThis, "location", { configurable: true, value: { pathname: "/login", search: "", hash: "#guide" } });
+  Object.defineProperty(globalThis, "history", { configurable: true, value: { pushState: (_state, _title, path) => paths.push(path) } });
+  api.defaults.adapter = async () => {
+    const error = new Error("Email not verified");
+    error.response = { status: 400, data: { message: "Email not verified" } };
+    throw error;
+  };
+  let workspace;
+  function Probe() { workspace = useAuthWorkspace(); return null; }
+  try {
+    renderToStaticMarkup(createElement(Probe));
+    assert.equal(await workspace.run("login", { email: "Alex@Example.com", password: "Secret123!" }), null);
+    assert.deepEqual(paths, ["/verify#guide"]);
+  } finally {
+    api.defaults.adapter = previous;
+    if (locationDescriptor) Object.defineProperty(globalThis, "location", locationDescriptor); else delete globalThis.location;
+    if (historyDescriptor) Object.defineProperty(globalThis, "history", historyDescriptor); else delete globalThis.history;
+  }
 });

@@ -61,7 +61,7 @@ export function describeRequestError(error, { online = true } = {}) {
   } else if (!message) {
     message = `Request failed (${status}). Please try again.`;
   }
-  return { kind, message, status: status || "ERR" };
+  return { kind, message, status: kind === "invalid-response" ? "INVALID" : status || "ERR" };
 }
 
 api.interceptors.response.use(

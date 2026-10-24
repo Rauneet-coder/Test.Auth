@@ -61,10 +61,14 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
       <div className="auth-form-heading">
         <span className="auth-eyebrow">YOUR ACCOUNT</span>
         <h2 id={`${formId}-title`}>{titles[mode]}</h2>
-        <p>A secure place to get started.</p>
+        <p>{mode === "register" ? "A few details, and you’re ready to go." : mode === "verify" ? "Enter the six-digit code from your verification email." : "Enter your details to continue to your account."}</p>
       </div>
       <form className="auth-form" onSubmit={handleSubmit} noValidate aria-busy={!!busy}>
         <FormNotice notice={notice} onDismiss={onDismissNotice} />
+        {mode === "verify" && <div className="auth-verification-guide">
+          <p>Verifying <strong>{fields.email || "your email address"}</strong></p>
+          <span>Codes expire after 5 minutes. Check your spam or junk folder if you don’t see the email.</span>
+        </div>}
         {mode === "register" && field("username", "Username")}
         {field("email", "Email address", "email")}
         {mode === "verify" ? <OtpField id={`${formId}-otp`} value={fields.otp || ""} onChange={(value) => updateField("otp", value)} inputRef={(element) => { fieldRefs.current.otp = element; }} error={clientErrors.otp || (!editedFields.otp && errors.otp) || undefined} disabled={!!busy} /> : field("password", "Password", "password")}

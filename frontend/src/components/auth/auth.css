@@ -58,3 +58,8 @@
 .auth-notice-success { background:#f0f8f2; border-color:#cfe5d5; color:#235c46; }
 .auth-notice-info { background:#f4f7f5; border-color:var(--auth-border); color:#40564a; }
 .auth-notice button { border:0; background:transparent; color:inherit; font-size:20px; line-height:1; padding:0 3px; min-width:24px; min-height:24px; cursor:pointer; }
+
+.auth-verification-guide { border:1px solid #dfeae2; background:#f6faf6; padding:13px 14px; border-radius:9px; }
+.auth-verification-guide p { margin:0 0 5px; font-size:13px; color:var(--auth-ink); overflow-wrap:anywhere; }
+.auth-verification-guide strong { font-weight:600; }
+.auth-verification-guide span { display:block; color:var(--auth-muted); font-size:12px; line-height:1.6; }

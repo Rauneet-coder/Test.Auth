@@ -13,6 +13,8 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
   const fieldRefs = useRef({});
   const [clientErrors, setClientErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
+  const checkCapsLock = (event) => setCapsLock(!!event.getModifierState?.("CapsLock"));
   const [editedFields, setEditedFields] = useState({});
   useEffect(() => { setEditedFields({}); }, [errors]);
   const handleSubmit = (event) => {
@@ -39,6 +41,9 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
       }} required
       autoComplete={name === "password" ? (mode === "register" ? "new-password" : "current-password") : name === "otp" ? "one-time-code" : name}
       autoCapitalize="none" spellCheck={false}
+      onKeyDown={name === "password" ? checkCapsLock : undefined}
+      onKeyUp={name === "password" ? checkCapsLock : undefined}
+      onBlur={name === "password" ? () => setCapsLock(false) : undefined}
       maxLength={name === "username" ? 30 : name === "otp" ? 6 : undefined}
       inputMode={name === "otp" ? "numeric" : name === "email" ? "email" : undefined}
       hint={name === "username" ? "Choose a username between 3 and 30 characters." : undefined} />
@@ -56,6 +61,7 @@ export default function AuthForm({ mode = "login", onModeChange, fields = {}, on
         {mode === "register" && field("username", "Username")}
         {field("email", "Email address", "email")}
         {mode === "verify" ? field("otp", "Verification code") : field("password", "Password", "password")}
+        {mode !== "verify" && capsLock && <p className="auth-caps-hint" role="status">Caps Lock is on. Passwords are case-sensitive.</p>}
         {mode === "register" && <PasswordChecklist value={fields.password || ""} />}
         <button className="auth-submit" type="submit">{mode === "register" ? "Create account" : mode === "verify" ? "Verify email" : "Sign in"}</button>
       </form>

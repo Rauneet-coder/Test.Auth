@@ -40,9 +40,22 @@ export default function App() {
     navigate('authentication');
     setNoticeArea('auth');
   };
-  const runSessionAction = (action) => {
+  const restoreRequestFocus = (trigger) => requestAnimationFrame(() => {
+    if (document.activeElement === document.body && trigger?.isConnected && !trigger.disabled) {
+      trigger.focus({ preventScroll: true });
+    }
+  });
+  const runSessionAction = async (action) => {
+    const trigger = document.activeElement;
     setNoticeArea('session');
-    void workspace.run(action);
+    await workspace.run(action);
+    restoreRequestFocus(trigger);
+  };
+  const submitForm = async (event) => {
+    const trigger = document.activeElement;
+    setNoticeArea('auth');
+    await workspace.submit(event);
+    restoreRequestFocus(trigger);
   };
   const selectResponse = (entry) => {
     workspace.setResult(entry);
@@ -63,7 +76,7 @@ export default function App() {
       {view === 'authentication' && <>
         <div className="workspace-auth-card">
           <AuthShowcase mode={workspace.mode}/>
-          <AuthForm mode={workspace.mode} onModeChange={startMode} fields={workspace.fields} onFieldChange={workspace.updateField} busy={workspace.busy} notice={noticeArea === 'auth' ? workspace.notice : null} errors={workspace.fieldErrors} onSubmit={event => { setNoticeArea('auth'); void workspace.submit(event); }} onDismissNotice={workspace.dismissNotice}/>
+          <AuthForm mode={workspace.mode} onModeChange={startMode} fields={workspace.fields} onFieldChange={workspace.updateField} busy={workspace.busy} notice={noticeArea === 'auth' ? workspace.notice : null} errors={workspace.fieldErrors} onSubmit={submitForm} onDismissNotice={workspace.dismissNotice}/>
         </div>
         <div className="workspace-auth-journey"><AuthJourney mode={workspace.mode} user={workspace.user}/></div>
         <div className="workspace-section-heading"><div><h2>A little room to explore</h2><p>Try a request. See what happens behind the scenes.</p></div><span>YOUR SESSION, IN FOCUS</span></div>

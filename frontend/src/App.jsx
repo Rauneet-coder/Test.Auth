@@ -59,7 +59,7 @@ export default function App() {
       </div>
       <ConnectionNotice online={workspace.online}/>
       <div className="workspace-live-region" role="status" aria-live="polite" aria-atomic="true">{workspace.busy ? 'Request in progress.' : workspace.user ? `Signed in as ${workspace.user.username}.` : workspace.sessionStatus === 'expired' ? 'Your session has expired.' : 'No active session.'}</div>
-      {noticeArea === 'session' && workspace.notice && <div className="workspace-session-notice"><FormNotice notice={workspace.notice} onDismiss={workspace.dismissNotice}/></div>}
+      {workspace.notice && (noticeArea === 'session' || view !== 'authentication') && <div className="workspace-session-notice"><FormNotice notice={workspace.notice} onDismiss={workspace.dismissNotice}/></div>}
       {view === 'authentication' && <>
         <div className="workspace-auth-card">
           <AuthShowcase mode={workspace.mode}/>

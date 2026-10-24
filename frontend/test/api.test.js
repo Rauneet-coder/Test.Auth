@@ -47,3 +47,27 @@ test("every auth operation supports cancellation before dispatch", async () => {
     await assert.rejects(authApi[action]({}, { signal: controller.signal }), { code: "ERR_CANCELED" });
   }
 });
+
+test("in-memory credentials are scoped to profile requests and can be cleared", async () => {
+  const { default: api, authApi, setAccessToken } = await import("../src/services/api.js");
+  const previous = api.defaults.adapter;
+  const requests = [];
+  api.defaults.adapter = async (config) => {
+    requests.push(config);
+    return { status: 200, data: { message: "OK", user: { username: "Alex", email: "Alex@example.com" }, accessToken: "new-token" }, config };
+  };
+  try {
+    setAccessToken("memory-token");
+    await authApi.getMe();
+    await authApi.login({ email: "Alex@example.com", password: "password" });
+    setAccessToken(null);
+    await authApi.getMe();
+    assert.equal(requests[0].headers.Authorization, "Bearer memory-token");
+    assert.equal(requests[1].headers.Authorization, undefined);
+    assert.equal(requests[2].headers.Authorization, undefined);
+    assert.equal(requests[0].withCredentials, true);
+  } finally {
+    setAccessToken(null);
+    api.defaults.adapter = previous;
+  }
+});

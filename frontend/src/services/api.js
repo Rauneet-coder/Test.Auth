@@ -4,7 +4,7 @@ import { getAction } from "../lib/workspace.js";
 // Keep the access token in memory. The browser manages the HttpOnly refresh cookie.
 let accessToken = null;
 export const setAccessToken = (token) => {
-  accessToken = token;
+  accessToken = typeof token === "string" && token.trim() && !/[\r\n]/.test(token) ? token : null;
 };
 const api = axios.create({
   baseURL: import.meta.env?.VITE_API_URL || "",
@@ -13,7 +13,9 @@ const api = axios.create({
   timeout: 15_000,
 });
 api.interceptors.request.use((config) => {
-  if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
+  if (accessToken && config.url === "/api/auth/me") {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
   return config;
 });
 export function retryDelaySeconds(value, now = Date.now()) {

@@ -95,7 +95,7 @@ export const login = (async (req, res) => {
     await sessionModel.create({
         user: user._id,
         refreshTokenHash: crypto.createHash("sha256").update(refreshToken).digest("hex"),
-        ip: req.ip,
+        ip: req.ip || "127.0.0.1",
         userAgent: req.headers["user-agent"]
     });
 

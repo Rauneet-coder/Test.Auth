@@ -82,6 +82,15 @@ describe("POST /api/auth/verify-email", () => {
             otpHash: expiredHash,
             deletedAt: new Date(Date.now() - 5 * 60 * 1000)
         });
+
+        const response = await request(app)
+            .post("/api/auth/verify-email")
+            .send({
+                email: testUser.email,
+                otp: expiredOtp
+            });
+
+        expect(response.statusCode).toBe(400);
     });
 
     // ─── Positive Test: Correct OTP ──────────────────────────────────────────

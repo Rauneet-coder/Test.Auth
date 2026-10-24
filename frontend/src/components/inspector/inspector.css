@@ -135,3 +135,23 @@ button.activity-row.activity-row-selected { background: #f0f5e9; box-shadow: ins
 .activity-outcome-label { font-size: 8px; font-weight: 400; }
 .activity-keyboard-hint { margin: 10px 2px 0; font-size: 9px; line-height: 1.7; color: #96a789; display: flex; justify-content: space-between; gap: 10px; }
 .activity-keyboard-hint > span { color: #a3b195; }
+@media (max-width: 600px) {
+  .inspector-card.session-panel { padding: 21px; }
+  .session-identity { margin-top: 23px; }
+  .session-request-actions { gap: 8px; margin-top: 21px; }
+  .session-request-actions .inspector-button { min-height: 44px; padding: 10px; }
+  .session-request-footer { align-items: flex-start; flex-direction: column; gap: 6px; margin-top: 13px; }
+  .session-signout-actions { gap: 19px; }
+  .session-signout-actions button { min-height: 36px; font-size: 10px; }
+  .session-confirm { padding: 13px; }
+  .session-confirm-actions .inspector-button { min-height: 42px; }
+}
+@media (max-width: 380px) {
+  .inspector-card.session-panel { padding: 18px; }
+  .session-request-actions { grid-template-columns: 1fr; }
+  .session-request-actions .inspector-button { justify-content: flex-start; }
+  .session-request-actions .inspector-button kbd { margin-left: auto; }
+  .session-confirm-actions { flex-direction: column; }
+  .session-confirm-actions .inspector-button { width: 100%; }
+  .session-expiry { padding-left: 0; margin-top: 12px; }
+}

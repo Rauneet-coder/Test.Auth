@@ -153,15 +153,6 @@ export const refreshToken = (async (req, res) => {
         return res.status(404).json({ message: "User not found" });
     }
 
-    const session = await sessionModel.findOne({
-        refreshTokenHash: oldRefreshTokenHash,
-        revoked: false
-    })
-
-    if (!session) {
-        return res.status(401).json({ message: "Invalid or expired refresh token" });
-    }
-
     const newAccessToken = jwt.sign({
         id: user._id,
         tokenUse: "access"
@@ -177,9 +168,25 @@ export const refreshToken = (async (req, res) => {
         expiresIn: "7d"
     });
 
-    const newRefreshTokenHash = crypto.createHash("sha256").update(newRefreshToken).digest("hex")
-    session.refreshTokenHash = newRefreshTokenHash;
-    await session.save();
+    const newRefreshTokenHash = crypto.createHash("sha256").update(newRefreshToken).digest("hex");
+
+    // Atomically rotate the token using a conditional database update.
+    // If concurrent requests present the same refresh token, only one succeeds;
+    // subsequent or concurrent requests find no matching document and are rejected.
+    const session = await sessionModel.findOneAndUpdate(
+        {
+            refreshTokenHash: oldRefreshTokenHash,
+            revoked: false
+        },
+        {
+            $set: { refreshTokenHash: newRefreshTokenHash }
+        },
+        { returnDocument: "after" }
+    );
+
+    if (!session) {
+        return res.status(401).json({ message: "Invalid or expired refresh token" });
+    }
 
     res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,

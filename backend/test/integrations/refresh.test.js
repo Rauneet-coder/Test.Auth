@@ -78,6 +78,19 @@ describe("POST /api/auth/refresh-token", () => {
         expect(response.body).toEqual({ message: "Invalid or expired refresh token" });
     });
 
+    it("should return 401 if refresh token lacks required tokenUse: refresh claim", async () => {
+        const jwt = (await import("jsonwebtoken")).default;
+        const config = (await import("../../src/config/config.js")).default;
+        const tokenWithoutUse = jwt.sign({ id: userDoc._id, jti: "test-jti" }, config.JWT_SECRET, { expiresIn: "7d" });
+
+        const response = await request(app)
+            .post("/api/auth/refresh-token")
+            .set("Cookie", [`refreshToken=${tokenWithoutUse}`]);
+
+        expect(response.statusCode).toBe(401);
+        expect(response.body).toEqual({ message: "Invalid or expired refresh token" });
+    });
+
     // ─── Positive Test: Refresh Token & Rotation (Without Artificial Delays) ─
     it("should return 200 and issue a new access token and uniquely rotated refresh token", async () => {
         const { cookies: initialCookies } = await getFreshLoginCookies();

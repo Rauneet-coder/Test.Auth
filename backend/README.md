@@ -41,26 +41,65 @@ npm run dev
 
 ## API Endpoints
 
-### Register User
+All endpoints are mounted under `/api/auth` and protected by rate limiting.
+
+### 1. User Registration
 `POST /api/auth/register`
+- **Body**: `{ "username": "string", "email": "string", "password": "string" }`
+- **Success (201)**: `{ "message": "User registered successfully", "user": { "username", "email", "verified": false } }`
+- **Features**: Database-level unique constraint handling, automatic rollback on email failure, and unverified account registration recovery.
 
-**Request Body:**
-```json
-{
-  "username": "exampleUser",
-  "email": "user@example.com",
-  "password": "yourpassword"
-}
-```
+### 2. Verify Email
+`POST /api/auth/verify-email`
+- **Body**: `{ "email": "string", "otp": "string" }`
+- **Success (200)**: `{ "message": "Email verified successfully", "user": { "username", "email", "verified": true } }`
+- **Features**: Failed attempt tracking, 5-attempt limit, and automatic lockout/expiry handling.
 
-**Response (201 Created):**
-```json
-{
-  "message": "User registered successfully",
-  "user": {
-    "username": "exampleUser",
-    "email": "user@example.com"
-  },
-  "token": "<jwt_token>"
-}
-```
+### 3. Resend Verification Code
+`POST /api/auth/resend-otp` (alias: `/api/auth/resend-verification`)
+- **Body**: `{ "email": "string" }`
+- **Success (200)**: `{ "message": "Verification code sent successfully" }`
+- **Features**: Replaces stale OTPs with a newly generated cryptographically secure code.
+
+### 4. User Login
+`POST /api/auth/login`
+- **Body**: `{ "email": "string", "password": "string" }`
+- **Success (200)**: Sets `refreshToken` HTTP-only cookie and returns `{ "message": "User logged in successfully", "accessToken": "<jwt>" }`.
+
+### 5. Get Profile
+`GET /api/auth/me`
+- **Headers**: `Authorization: Bearer <accessToken>`
+- **Success (200)**: `{ "message": "User found", "user": { "username", "email" } }`
+- **Features**: Strict `tokenUse: "access"` claim verification.
+
+### 6. Refresh Token
+`POST /api/auth/refresh-token`
+- **Cookie**: `refreshToken=<cookie>`
+- **Success (200)**: Atomically rotates the refresh token cookie and issues a new access token `{ "message": "Access token refreshed successfully", "accessToken": "<jwt>" }`.
+- **Features**: Atomic conditional database update preventing race conditions and token reuse.
+
+### 7. Logout (Single Device)
+`POST /api/auth/logout`
+- **Cookie**: `refreshToken=<cookie>`
+- **Success (200)**: Atomically revokes current session and clears cookie.
+
+### 8. Logout All Devices
+`POST /api/auth/logout-all`
+- **Cookie**: `refreshToken=<cookie>`
+- **Success (200)**: Revokes all active sessions for the authenticated user and clears cookie.
+
+### 9. Health Check
+`GET /api/auth/health-check`
+- **Success (200)**: `{ "message": "OK" }`
+
+---
+
+## Security Documentation
+
+See [auth-security.md](../docs/auth-security.md) for full details on:
+- Atomic refresh-token rotation
+- OTP attempt limits and lockout handling
+- Strict JWT claim enforcement (`tokenUse`)
+- Cryptographic OTP generation boundaries (`crypto.randomInt`)
+- Email failure propagation and registration recovery flow
+- Database-level unique constraint enforcement

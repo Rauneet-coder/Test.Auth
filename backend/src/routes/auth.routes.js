@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as authController from "../controllers/auth.controller.js";
 import { validate } from "../middlewares/validate.js";
 import { authenticate } from "../middlewares/authenticate.js";
-import { RegisterSchema, LoginSchema, VerifyOtpSchema } from "../Validators/auth.validator.js";
+import { RegisterSchema, LoginSchema, VerifyOtpSchema, ResendOtpSchema } from "../Validators/auth.validator.js";
 import { authRateLimiter } from "../middlewares/rateLimiter.js";
 
 
@@ -38,6 +38,9 @@ authRouter.post("/logout", authController.logout);
 authRouter.post("/logout-all", authController.logoutAll);
 
 authRouter.post("/verify-email", validate(VerifyOtpSchema), authController.verifyEmail);
+
+authRouter.post("/resend-otp", validate(ResendOtpSchema), authController.resendOtp);
+authRouter.post("/resend-verification", validate(ResendOtpSchema), authController.resendOtp);
 
 authRouter.get("/health-check", authController.healthcheck);
 export default authRouter;

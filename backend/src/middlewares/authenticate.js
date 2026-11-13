@@ -13,7 +13,8 @@ export const authenticate = async (req, res, next) => {
     try {
         const decoded = jwt.verify(token, config.JWT_SECRET);
 
-        if (decoded.tokenUse && decoded.tokenUse !== "access") {
+        // Require exact access claim
+        if (decoded.tokenUse !== "access") {
             return res.status(401).json({ message: "Unauthorized: invalid token type" });
         }
         

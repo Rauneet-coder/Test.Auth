@@ -223,17 +223,20 @@ export const logout = (async (req, res) => {
         return res.status(404).json({ message: "User not found" });
     }
 
-    const session = await sessionModel.findOne({
-        refreshTokenHash: crypto.createHash("sha256").update(refreshToken).digest("hex"),
-        revoked: false
-    })
+    const session = await sessionModel.findOneAndUpdate(
+        {
+            refreshTokenHash: crypto.createHash("sha256").update(refreshToken).digest("hex"),
+            revoked: false
+        },
+        {
+            $set: { revoked: true }
+        },
+        { returnDocument: "after" }
+    );
 
     if (!session) {
         return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
-
-    session.revoked = true;
-    await session.save();
 
     res.clearCookie("refreshToken");
 

@@ -20,8 +20,9 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     }
-
-})
+}, {
+    autoIndex: true
+});
 
 const Usermodel = mongoose.model("Users", userSchema);
 

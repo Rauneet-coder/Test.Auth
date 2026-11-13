@@ -142,7 +142,8 @@ export const refreshToken = (async (req, res) => {
         return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 
-    if (decoded.tokenUse && decoded.tokenUse !== "refresh") {
+    // Require exact refresh claim
+    if (decoded.tokenUse !== "refresh") {
         return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 
@@ -205,7 +206,8 @@ export const logout = (async (req, res) => {
         return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 
-    if (decoded.tokenUse && decoded.tokenUse !== "refresh") {
+    // Require exact refresh claim
+    if (decoded.tokenUse !== "refresh") {
         return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 
@@ -246,7 +248,8 @@ export const logoutAll = (async (req, res) => {
         return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 
-    if (decoded.tokenUse && decoded.tokenUse !== "refresh") {
+    // Require exact refresh claim
+    if (decoded.tokenUse !== "refresh") {
         return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 

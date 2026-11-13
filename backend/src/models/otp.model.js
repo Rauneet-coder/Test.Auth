@@ -15,6 +15,14 @@ const otpSchema = new mongoose.Schema({
         type: String,
         required: [ true, "OTP hash is required" ]
     },
+    failedAttempts: {
+        type: Number,
+        default: 0
+    },
+    maxAttempts: {
+        type: Number,
+        default: 5
+    },
     createdAt: {
         type: Date,
         default: Date.now,

@@ -199,4 +199,42 @@ describe("POST /api/auth/register", () => {
         const otpInDb = await otpModel.findOne({ email: failUser.email });
         expect(otpInDb).toBeNull();
     });
+
+    // ─── Registration Recovery ──────────────────────────────────────────────
+    it("should allow an unverified user to recover their registration and receive a new OTP", async () => {
+        sendEmail.mockResolvedValue(undefined);
+        const recoveryUser = {
+            username: "recoveryuser",
+            email: "recovery.user@example.com",
+            password: "SecurePassword123!"
+        };
+        await Usermodel.deleteOne({ email: recoveryUser.email });
+        await otpModel.deleteMany({ email: recoveryUser.email });
+
+        // Initial registration
+        const res1 = await request(app)
+            .post("/api/auth/register")
+            .send(recoveryUser);
+        expect(res1.statusCode).toBe(201);
+
+        // User didn't verify, then registers again with updated password
+        const res2 = await request(app)
+            .post("/api/auth/register")
+            .send({
+                username: recoveryUser.username,
+                email: recoveryUser.email,
+                password: "NewSecurePassword456!"
+            });
+
+        expect(res2.statusCode).toBe(201);
+        expect(res2.body).toHaveProperty("message", "User registered successfully");
+
+        const updatedUser = await Usermodel.findOne({ email: recoveryUser.email });
+        expect(updatedUser.verified).toBe(false);
+        const passwordMatches = await bcrypt.compare("NewSecurePassword456!", updatedUser.password);
+        expect(passwordMatches).toBe(true);
+
+        await Usermodel.deleteOne({ email: recoveryUser.email });
+        await otpModel.deleteMany({ email: recoveryUser.email });
+    });
 });

@@ -149,4 +149,19 @@ describe("POST /api/auth/refresh-token", () => {
         expect(secondRefreshRes.statusCode).toBe(200);
         expect(secondRefreshRes.body).toHaveProperty("accessToken");
     });
+
+    // ─── Concurrency Test: Atomic Rotation ──────────────────────────────────
+    it("should atomically rotate refresh token and reject concurrent reuse", async () => {
+        const { cookies: initialCookies } = await getFreshLoginCookies();
+
+        // Fire 2 concurrent refresh requests simultaneously with the exact same initial refresh token
+        const [res1, res2] = await Promise.all([
+            request(app).post("/api/auth/refresh-token").set("Cookie", initialCookies),
+            request(app).post("/api/auth/refresh-token").set("Cookie", initialCookies)
+        ]);
+
+        const statuses = [res1.statusCode, res2.statusCode].sort();
+        // Exactly one request must succeed with 200, and the other must be rejected with 401
+        expect(statuses).toEqual([200, 401]);
+    });
 });

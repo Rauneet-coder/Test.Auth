@@ -9,6 +9,8 @@ import request from "supertest";
 import bcrypt from "bcrypt";
 import app from "../../src/app.js";
 import Usermodel from "../../src/models/user.model.js";
+import otpModel from "../../src/models/otp.model.js";
+import { sendEmail } from "../../src/services/email.service.js";
 
 describe("POST /api/auth/register", () => {
     const validUser = {
@@ -169,5 +171,32 @@ describe("POST /api/auth/register", () => {
         expect(isMatch).toBe(true);
 
         await Usermodel.deleteOne({ email: hashTestUser.email });
+    });
+
+    // ─── Registration Failure Rollback & Email Error Propagation ─────────────
+    it("should return 500, propagate email failure, and clean up unverified user without leaving zombies", async () => {
+        sendEmail.mockRejectedValueOnce(new Error("SMTP connection refused"));
+        const failUser = {
+            username: "failuser",
+            email: "fail.user@example.com",
+            password: "SecurePassword123!"
+        };
+        await Usermodel.deleteOne({ email: failUser.email });
+        await otpModel.deleteMany({ email: failUser.email });
+
+        const response = await request(app)
+            .post("/api/auth/register")
+            .send(failUser);
+
+        expect(response.statusCode).toBe(500);
+        expect(response.body).toHaveProperty("message", "Failed to send verification email");
+
+        // Assert that the user was rolled back and NOT left behind
+        const userInDb = await Usermodel.findOne({ email: failUser.email });
+        expect(userInDb).toBeNull();
+
+        // Assert that OTP was cleaned up
+        const otpInDb = await otpModel.findOne({ email: failUser.email });
+        expect(otpInDb).toBeNull();
     });
 });

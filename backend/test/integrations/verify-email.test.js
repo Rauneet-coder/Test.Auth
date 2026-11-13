@@ -111,4 +111,78 @@ describe("POST /api/auth/verify-email", () => {
         const updatedUser = await Usermodel.findById(createdUser._id);
         expect(updatedUser.verified).toBe(true);
     });
+
+    // ─── Security Test: Attempt limit tracking and lockout/expiry ────────────
+    it("should track failed attempts and lock out/expire OTP after max attempts", async () => {
+        const lockoutUser = {
+            username: "lockoutuser",
+            email: "lockout.test@example.com",
+            password: "SecurePassword123!"
+        };
+        const correctCode = "456789";
+
+        // Seed unverified user
+        await Usermodel.deleteOne({ email: lockoutUser.email });
+        await otpModel.deleteMany({ email: lockoutUser.email });
+        const hashedPassword = await bcrypt.hash(lockoutUser.password, 10);
+        const user = await Usermodel.create({
+            username: lockoutUser.username,
+            email: lockoutUser.email,
+            password: hashedPassword,
+            verified: false
+        });
+
+        // Seed OTP with maxAttempts: 5
+        const otpHash = crypto.createHash("sha256").update(correctCode).digest("hex");
+        await otpModel.create({
+            user: user._id,
+            email: lockoutUser.email,
+            otpHash,
+            failedAttempts: 0,
+            maxAttempts: 5,
+            deletedAt: new Date(Date.now() + 10 * 60 * 1000)
+        });
+
+        // 1. Submit 4 incorrect attempts -> each should return 400 Invalid OTP
+        for (let i = 1; i <= 4; i++) {
+            const res = await request(app)
+                .post("/api/auth/verify-email")
+                .send({
+                    email: lockoutUser.email,
+                    otp: "000000"
+                });
+            expect(res.statusCode).toBe(400);
+            expect(res.body).toEqual({ message: "Invalid OTP" });
+
+            const doc = await otpModel.findOne({ email: lockoutUser.email });
+            expect(doc).toBeDefined();
+            expect(doc.failedAttempts).toBe(i);
+        }
+
+        // 2. Submit 5th incorrect attempt -> triggers lockout/expiry
+        const lockoutRes = await request(app)
+            .post("/api/auth/verify-email")
+            .send({
+                email: lockoutUser.email,
+                otp: "000000"
+            });
+        expect(lockoutRes.statusCode).toBe(400);
+        expect(lockoutRes.body).toEqual({ message: "Too many failed attempts. OTP has expired." });
+
+        // OTP record should now be deleted / invalidated
+        const expiredDoc = await otpModel.findOne({ email: lockoutUser.email });
+        expect(expiredDoc).toBeNull();
+
+        // 3. Even presenting the CORRECT code after lockout must be rejected
+        const correctAfterLockout = await request(app)
+            .post("/api/auth/verify-email")
+            .send({
+                email: lockoutUser.email,
+                otp: correctCode
+            });
+        expect(correctAfterLockout.statusCode).toBe(400);
+
+        // Clean up
+        await Usermodel.deleteOne({ _id: user._id });
+    });
 });

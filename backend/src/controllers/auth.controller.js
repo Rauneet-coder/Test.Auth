@@ -24,19 +24,39 @@ export const registerUser = (async (req, res) => {
         ],
     });
 
+    let user;
+    let isNewUser = false;
+
     if (isAlreadyExists) {
-        return res.status(409).json({ message: "User already exists" });
+        // If the existing user is verified or if credentials belong to distinct users
+        if (isAlreadyExists.verified || isAlreadyExists.email !== email || isAlreadyExists.username !== username) {
+            return res.status(409).json({ message: "User already exists" });
+        }
+
+        // Registration recovery: allow an unverified user to recover their registration
+        const hashedPass = await bcrypt.hash(password, 12);
+        isAlreadyExists.password = hashedPass;
+        await isAlreadyExists.save();
+        user = isAlreadyExists;
+
+        // Invalidate old OTPs for this unverified registration
+        await otpModel.deleteMany({ email });
+    } else {
+        const hashedPass = await bcrypt.hash(password, 12);
+        try {
+            user = await Usermodel.create({
+                username,
+                email,
+                password: hashedPass
+            });
+            isNewUser = true;
+        } catch (dbError) {
+            if (dbError.code === 11000) {
+                return res.status(409).json({ message: "User already exists" });
+            }
+            throw dbError;
+        }
     }
-
-    // const hashedPass = await crypto.createHash("sha256").update(password).digest("hex") Not used Crypto for hashing password 
-    // as it is not recommended for password hashing. Instead, we can use bcrypt library for hashing password. 
-
-    const hashedPass = await bcrypt.hash(password, 12);
-    const user = await Usermodel.create({
-        username,
-        email,
-        password: hashedPass
-    })
 
     const otp = generateOtp();
     const otpHtml = getOtpHtml(otp);
@@ -52,7 +72,9 @@ export const registerUser = (async (req, res) => {
     } catch {
         // Propagate failure and clean up to prevent leaving behind an unverified zombie user
         await otpModel.deleteMany({ email });
-        await Usermodel.deleteOne({ _id: user._id });
+        if (isNewUser) {
+            await Usermodel.deleteOne({ _id: user._id });
+        }
         return res.status(500).json({ message: "Failed to send verification email" });
     }
 

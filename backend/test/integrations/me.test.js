@@ -78,6 +78,20 @@ describe("GET /api/auth/me", () => {
         expect(response.body).toEqual({ message: "Unauthorized: invalid token type" });
     });
 
+    it("should return 401 if token lacks required tokenUse: access claim", async () => {
+        const jwt = (await import("jsonwebtoken")).default;
+        const config = (await import("../../src/config/config.js")).default;
+        const user = await Usermodel.findOne({ email: testUser.email });
+        const tokenWithoutUse = jwt.sign({ id: user._id }, config.JWT_SECRET, { expiresIn: "15m" });
+
+        const response = await request(app)
+            .get("/api/auth/me")
+            .set("Authorization", `Bearer ${tokenWithoutUse}`);
+
+        expect(response.statusCode).toBe(401);
+        expect(response.body).toEqual({ message: "Unauthorized: invalid token type" });
+    });
+
     it("should return 200 and user profile with valid Bearer token", async () => {
         const response = await request(app)
             .get("/api/auth/me")

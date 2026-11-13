@@ -288,29 +288,63 @@ export const logoutAll = (async (req, res) => {
 });
 
 export async function verifyEmail(req, res) {
-    const { otp, email } = req.body
-
-    const otpHash = crypto.createHash("sha256").update(String(otp)).digest("hex");
+    const { otp, email } = req.body;
 
     const otpDoc = await otpModel.findOne({
         email,
-        otpHash,
         deletedAt: { $gt: new Date() }
-    })
+    }).sort({ createdAt: -1 });
 
     if (!otpDoc) {
         return res.status(400).json({
             message: "Invalid OTP"
-        })
+        });
+    }
+
+    const MAX_ATTEMPTS = otpDoc.maxAttempts || 5;
+
+    // Check if the OTP is already locked out due to prior failed attempts
+    if (otpDoc.failedAttempts >= MAX_ATTEMPTS) {
+        await otpModel.deleteMany({ email });
+        return res.status(400).json({
+            message: "Too many failed attempts. OTP has expired."
+        });
+    }
+
+    const inputHash = crypto.createHash("sha256").update(String(otp)).digest("hex");
+
+    if (otpDoc.otpHash !== inputHash) {
+        // Atomically increment failed attempts
+        const updatedDoc = await otpModel.findOneAndUpdate(
+            { _id: otpDoc._id },
+            { $inc: { failedAttempts: 1 } },
+            { returnDocument: "after" }
+        );
+
+        // Lockout and expiry handling if attempt limit reached
+        if (updatedDoc && updatedDoc.failedAttempts >= MAX_ATTEMPTS) {
+            await otpModel.deleteMany({ email });
+            return res.status(400).json({
+                message: "Too many failed attempts. OTP has expired."
+            });
+        }
+
+        return res.status(400).json({
+            message: "Invalid OTP"
+        });
     }
 
     const user = await Usermodel.findByIdAndUpdate(otpDoc.user, {
         verified: true
-    }, { new: true })
+    }, { returnDocument: "after" });
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
 
     await otpModel.deleteMany({
         user: otpDoc.user
-    })
+    });
 
     return res.status(200).json({
         message: "Email verified successfully",
@@ -319,5 +353,5 @@ export async function verifyEmail(req, res) {
             email: user.email,
             verified: user.verified
         }
-    })
+    });
 }

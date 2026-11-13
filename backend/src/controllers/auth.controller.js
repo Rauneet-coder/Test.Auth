@@ -47,7 +47,14 @@ export const registerUser = (async (req, res) => {
         otpHash: crypto.createHash("sha256").update(otp).digest("hex")
     });
 
-    await sendEmail(email, "OTP Verification", `Your OTP code is ${otp}`, otpHtml)
+    try {
+        await sendEmail(email, "OTP Verification", `Your OTP code is ${otp}`, otpHtml);
+    } catch {
+        // Propagate failure and clean up to prevent leaving behind an unverified zombie user
+        await otpModel.deleteMany({ email });
+        await Usermodel.deleteOne({ _id: user._id });
+        return res.status(500).json({ message: "Failed to send verification email" });
+    }
 
     res.status(201).json({
         message: "User registered successfully",

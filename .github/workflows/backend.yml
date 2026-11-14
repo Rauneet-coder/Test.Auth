@@ -63,7 +63,17 @@ jobs:
             echo "::error::Docker Hub credentials missing. Please set DOCKER_USERNAME and DOCKER_PASSWORD in GitHub repository secrets."
             exit 1
           fi
-          REPO_OWNER=$(echo "$DOCKER_USERNAME" | tr '[:upper:]' '[:lower:]')
-          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+          DOCKER_USER=$(echo "$DOCKER_USERNAME" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//')
+          DOCKER_PASS=$(echo "$DOCKER_PASSWORD" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//')
+
+          if [[ "$DOCKER_USER" == *"@"* ]]; then
+            echo "::error::DOCKER_USERNAME must be your Docker Hub username (Docker ID), NOT an email address. Update it using: gh secret set DOCKER_USERNAME --app actions"
+            exit 1
+          fi
+
+          REPO_OWNER=$(echo "$DOCKER_USER" | tr '[:upper:]' '[:lower:]')
+
+          printf '%s' "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
           docker build -t "$REPO_OWNER/aith-backend:latest" ./backend
           docker push "$REPO_OWNER/aith-backend:latest"

@@ -57,14 +57,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build -t "${DOCKER_USERNAME:-local}/aith-backend:latest" ./backend
-
-      - name: Push to Docker Hub
+      - name: Build and Push Docker image
         run: |
           if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PASSWORD" ]; then
             echo "::error::Docker Hub credentials missing. Please set DOCKER_USERNAME and DOCKER_PASSWORD in GitHub repository secrets."
             exit 1
           fi
+          REPO_OWNER=$(echo "$DOCKER_USERNAME" | tr '[:upper:]' '[:lower:]')
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          docker push "$DOCKER_USERNAME/aith-backend:latest"
+          docker build -t "$REPO_OWNER/aith-backend:latest" ./backend
+          docker push "$REPO_OWNER/aith-backend:latest"

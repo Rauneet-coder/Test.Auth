@@ -517,7 +517,7 @@ Defined in [`.env.example`](./.env.example). Copy to `.env` and fill in real val
 
 ## 10 · CI/CD Pipeline
 
-**File:** [`.github/workflows/ci.yml`](./.github/workflows/ci.yml)  
+**File:** [`.github/workflows/backend.yml`](../.github/workflows/backend.yml)  
 **Trigger:** Every push and pull request to `main`
 
 | Job | Depends on | What it does |

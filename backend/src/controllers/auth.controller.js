@@ -163,7 +163,7 @@ export const getMe = (async (req, res) => {
 export const refreshToken = (async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken){
-        return res.status(401).json({ message: "Unauthorized" });
+        throw new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token is required");
     }
     let decoded;
     try {

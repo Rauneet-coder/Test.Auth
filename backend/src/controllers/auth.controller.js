@@ -180,7 +180,7 @@ export const refreshToken = (async (req, res) => {
     const oldRefreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex")
     const user = await Usermodel.findById(decoded.id);
     if (!user){
-        return res.status(404).json({ message: "User not found" });
+        throw new AppError(404, "RESOURCE_NOT_FOUND", "User not found");
     }
 
     const newAccessToken = jwt.sign({
@@ -253,7 +253,7 @@ export const logout = (async (req, res) => {
 
     const user = await Usermodel.findById(decoded.id);
     if (!user){
-        return res.status(404).json({ message: "User not found" });
+        throw new AppError(404, "RESOURCE_NOT_FOUND", "User not found");
     }
 
     const session = await sessionModel.findOneAndUpdate(
@@ -372,7 +372,7 @@ export const verifyEmail = (async(req, res) => {
     }, { returnDocument: "after" });
 
     if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        throw new AppError(404, "RESOURCE_NOT_FOUND", "User not found");
     }
 
     await otpModel.deleteMany({
@@ -394,7 +394,7 @@ export const resendOtp = (async(req, res) => {
 
     const user = await Usermodel.findOne({ email });
     if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        throw new AppError(404, "RESOURCE_NOT_FOUND", "User not found");
     }
 
     if (user.verified) {

@@ -95,7 +95,7 @@ export const login = (async (req, res) => {
 
     const user = await Usermodel.findOne({email});
     if (!user) {
-        return res.status(400).json({ message: "Invalid email or password" });
+        throw new AppError(400, "INVALID_CREDENTIALS", "Invalid email or password");
     }
 
     if(!user.verified){
@@ -104,7 +104,7 @@ export const login = (async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-        return res.status(400).json({ message: "Invalid email or password" });
+        throw new AppError(400, "INVALID_CREDENTIALS", "Invalid email or password");
     }
     
     const accessToken = jwt.sign({

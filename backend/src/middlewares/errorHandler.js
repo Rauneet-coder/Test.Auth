@@ -28,6 +28,10 @@ export const errorHandler = (err, req, res, next) => {
             field: issue.path.join("."),
             message: issue.message,
         }));
+    } else if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+        statusCode = 400;
+        code = "INVALID_REQUEST_BODY";
+        message = "Invalid JSON in request body";
         statusCode = err.statusCode;
         code = err.code;
         message = err.message;

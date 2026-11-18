@@ -76,7 +76,7 @@ export const registerUser = (async (req, res) => {
         if (isNewUser) {
             await Usermodel.deleteOne({ _id: user._id });
         }
-        return res.status(500).json({ message: "Failed to send verification email" });
+        throw new AppError(500, "INTERNAL_SERVER_ERROR", "Failed to send verification email");
     }
 
     res.status(201).json({
@@ -434,7 +434,7 @@ export const resendOtp = (async(req, res) => {
         await sendEmail(email, "OTP Verification", `Your OTP code is ${otp}`, otpHtml);
     } catch {
         await otpModel.deleteMany({ email });
-        return res.status(500).json({ message: "Failed to send verification email" });
+        throw new AppError(500, "INTERNAL_SERVER_ERROR", "Failed to send verification email");
     }
 
     return res.status(200).json({

@@ -15,4 +15,7 @@ export class AppError extends Error {
     static authenticationRequired(message = "Authentication token is required") {
         return new AppError(401, "AUTHENTICATION_REQUIRED", message);
     }
+    static invalidAccessToken(message = "Invalid or expired access token") {
+        return new AppError(401, "INVALID_ACCESS_TOKEN", message);
+    }
 }

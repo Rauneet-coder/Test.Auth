@@ -1,3 +1,4 @@
+import { AppError } from "./errors/AppError.js";
 // This is the main entry point of the application where we are importing the express 
 // framework and morgan middleware for logging HTTP requests. We are also setting up the 
 // express application to use morgan for logging and express.json() middleware to parse incoming JSON requests.
@@ -25,7 +26,7 @@ app.use(cors({
         if (!origin || allowedOrigins.includes(origin)) {
             return callback(null, true);
         }
-        return callback(new Error("Not allowed by CORS"));
+        return callback(new AppError(403, "ORIGIN_NOT_ALLOWED", "CORS origin not allowed"));
     },
     credentials: true
 }));

@@ -1,4 +1,3 @@
-import { AppError } from "./errors/AppError.js";
 // This is the main entry point of the application where we are importing the express 
 // framework and morgan middleware for logging HTTP requests. We are also setting up the 
 // express application to use morgan for logging and express.json() middleware to parse incoming JSON requests.
@@ -9,10 +8,12 @@ import helmet from "helmet";
 import cors from "cors";
 import authRouter from "./routes/auth.routes.js";
 import { requestId } from "./middlewares/requestId.js";
-
+import { errorHandler } from "./middlewares/errorHandler.js";
+import { AppError } from "./errors/AppError.js";
 
 const app = express();
 
+// Assign / correlate request ID first for all downstream middleware, routes and logging
 app.use(requestId);
 
 app.use(helmet());
@@ -52,22 +53,8 @@ app.use((_req, _res, next) => {
     next(new AppError(404, "ROUTE_NOT_FOUND", "The requested resource does not exist"));
 });
 
-// ─── Global Error Handler ────────────────────────────────────────────────────
-// Express identifies an error-handling middleware by its four-argument
-// signature (err, req, res, next). All async errors in Express 5 are
-// automatically forwarded here, so every unhandled rejection results in a
-// structured JSON 500 response instead of crashing the process or leaking
-// an HTML stack trace to the client.
-app.use((err, _req, res, _next) => {
-    // Log the full error server-side for debugging.
-    console.error("[ERROR]", err);
-
-    // Never send the raw stack trace to the client in production.
-    const statusCode = err.status ?? err.statusCode ?? 500;
-    res.status(statusCode).json({
-        error: "INTERNAL_SERVER_ERROR",
-        message: "An unexpected error occurred. Please try again later."
-    });
-});
+// ─── Global Centralized Error Handler ────────────────────────────────────────
+// Standardizes all errors into { success: false, error: { code, message, details, requestId } }
+app.use(errorHandler);
 
 export default app;

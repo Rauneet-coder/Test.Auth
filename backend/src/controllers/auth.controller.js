@@ -1,3 +1,4 @@
+import { AppError } from "../errors/AppError.js";
 import Usermodel from "../models/user.model.js";
 import crypto from "crypto"
 import bcrypt from "bcrypt";
@@ -30,7 +31,7 @@ export const registerUser = (async (req, res) => {
     if (isAlreadyExists) {
         // If the existing user is verified or if credentials belong to distinct users
         if (isAlreadyExists.verified || isAlreadyExists.email !== email || isAlreadyExists.username !== username) {
-            return res.status(409).json({ message: "User already exists" });
+            throw new AppError(409, "RESOURCE_CONFLICT", "User already exists");
         }
 
         // Registration recovery: allow an unverified user to recover their registration
@@ -52,7 +53,7 @@ export const registerUser = (async (req, res) => {
             isNewUser = true;
         } catch (dbError) {
             if (dbError.code === 11000) {
-                return res.status(409).json({ message: "User already exists" });
+                throw new AppError(409, "RESOURCE_CONFLICT", "User already exists");
             }
             throw dbError;
         }

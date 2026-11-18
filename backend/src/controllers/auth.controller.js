@@ -329,9 +329,7 @@ export const verifyEmail = (async(req, res) => {
     }).sort({ createdAt: -1 });
 
     if (!otpDoc) {
-        return res.status(400).json({
-            message: "Invalid OTP"
-        });
+        throw new AppError(400, "INVALID_OTP", "Invalid OTP");
     }
 
     const MAX_ATTEMPTS = otpDoc.maxAttempts || 5;
@@ -362,9 +360,7 @@ export const verifyEmail = (async(req, res) => {
             });
         }
 
-        return res.status(400).json({
-            message: "Invalid OTP"
-        });
+        throw new AppError(400, "INVALID_OTP", "Invalid OTP");
     }
 
     const user = await Usermodel.findByIdAndUpdate(otpDoc.user, {

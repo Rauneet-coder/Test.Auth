@@ -99,7 +99,7 @@ export const login = (async (req, res) => {
     }
 
     if(!user.verified){
-        return res.status(400).json({message: "Email not verified"});
+        throw new AppError(400, "EMAIL_NOT_VERIFIED", "Email not verified");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);

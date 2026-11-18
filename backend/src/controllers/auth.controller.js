@@ -1,6 +1,5 @@
-import { AppError } from "../errors/AppError.js";
 import Usermodel from "../models/user.model.js";
-import crypto from "crypto"
+import crypto from "crypto";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
@@ -8,14 +7,15 @@ import sessionModel from "../models/session.model.js";
 import { sendEmail } from "../services/email.service.js";
 import { generateOtp, getOtpHtml } from "../utils/utils.js";
 import otpModel from "../models/otp.model.js";
+import { AppError } from "../errors/AppError.js";
 
-export const healthcheck = (async (req, res) => {
+export const healthcheck = async (_req, res) => {
     res.status(200).json({
         message: "OK"
     });
-})  
+};
 
-export const registerUser = (async (req, res) => {
+export const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
     const isAlreadyExists = await Usermodel.findOne({
@@ -86,19 +86,18 @@ export const registerUser = (async (req, res) => {
             email: user.email,
             verified: user.verified
         }
-    })
+    });
+};
 
-})
-
-export const login = (async (req, res) => {
+export const login = async (req, res) => {
     const { email, password } = req.body;
 
-    const user = await Usermodel.findOne({email});
+    const user = await Usermodel.findOne({ email });
     if (!user) {
         throw new AppError(400, "INVALID_CREDENTIALS", "Invalid email or password");
     }
 
-    if(!user.verified){
+    if (!user.verified) {
         throw new AppError(400, "EMAIL_NOT_VERIFIED", "Email not verified");
     }
 
@@ -135,7 +134,7 @@ export const login = (async (req, res) => {
         secure: true,
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    })
+    });
 
     res.status(200).json({
         message: "User logged in successfully",
@@ -144,10 +143,10 @@ export const login = (async (req, res) => {
             email: user.email,
         },
         accessToken
-    })
-})
+    });
+};
 
-export const getMe = (async (req, res) => {
+export const getMe = async (req, res) => {
     // req.user is guaranteed to exist here because the authenticate
     // middleware runs before this handler and already verified the JWT,
     // looked up the user, and attached them to the request object.
@@ -158,13 +157,14 @@ export const getMe = (async (req, res) => {
             email: req.user.email
         }
     });
-})
+};
 
-export const refreshToken = (async (req, res) => {
+export const refreshToken = async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken){
+    if (!refreshToken) {
         throw new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token is required");
     }
+
     let decoded;
     try {
         decoded = jwt.verify(refreshToken, config.JWT_SECRET);
@@ -177,9 +177,9 @@ export const refreshToken = (async (req, res) => {
         throw new AppError(401, "INVALID_REFRESH_TOKEN", "Invalid or expired refresh token");
     }
 
-    const oldRefreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex")
+    const oldRefreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
     const user = await Usermodel.findById(decoded.id);
-    if (!user){
+    if (!user) {
         throw new AppError(404, "RESOURCE_NOT_FOUND", "User not found");
     }
 
@@ -226,19 +226,20 @@ export const refreshToken = (async (req, res) => {
         secure: true,
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    })
+    });
 
     res.status(200).json({
         message: "Access token refreshed successfully",
         accessToken: newAccessToken
-    })
-});
+    });
+};
 
-export const logout = (async (req, res) => {
+export const logout = async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken){
+    if (!refreshToken) {
         throw new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token is required");
     }
+
     let decoded;
     try {
         decoded = jwt.verify(refreshToken, config.JWT_SECRET);
@@ -252,7 +253,7 @@ export const logout = (async (req, res) => {
     }
 
     const user = await Usermodel.findById(decoded.id);
-    if (!user){
+    if (!user) {
         throw new AppError(404, "RESOURCE_NOT_FOUND", "User not found");
     }
 
@@ -274,10 +275,9 @@ export const logout = (async (req, res) => {
     res.clearCookie("refreshToken");
 
     res.status(200).json({ message: "User logged out successfully" });
+};
 
-})
-
-export const logoutAll = (async (req, res) => {
+export const logoutAll = async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
@@ -318,9 +318,9 @@ export const logoutAll = (async (req, res) => {
     res.status(200).json({
         message: "Logged out from all devices successfully"
     });
-});
+};
 
-export const verifyEmail = (async(req, res) => {
+export const verifyEmail = async (req, res) => {
     const { otp, email } = req.body;
 
     const otpDoc = await otpModel.findOne({
@@ -353,9 +353,7 @@ export const verifyEmail = (async(req, res) => {
         // Lockout and expiry handling if attempt limit reached
         if (updatedDoc && updatedDoc.failedAttempts >= MAX_ATTEMPTS) {
             await otpModel.deleteMany({ email });
-            return res.status(400).json({
-                message: "Too many failed attempts. OTP has expired."
-            });
+            throw new AppError(400, "OTP_EXPIRED", "Too many failed attempts. OTP has expired.");
         }
 
         throw new AppError(400, "INVALID_OTP", "Invalid OTP");
@@ -381,9 +379,9 @@ export const verifyEmail = (async(req, res) => {
             verified: user.verified
         }
     });
-})
+};
 
-export const resendOtp = (async(req, res) => {
+export const resendOtp = async (req, res) => {
     const { email } = req.body;
 
     const user = await Usermodel.findOne({ email });
@@ -392,7 +390,7 @@ export const resendOtp = (async(req, res) => {
     }
 
     if (user.verified) {
-        return res.status(400).json({ message: "Email already verified" });
+        throw new AppError(400, "RESOURCE_CONFLICT", "Email already verified");
     }
 
     // Enforce 60-second cooldown between resend requests (configurable via OTP_RESEND_COOLDOWN_SECONDS, 0 in test mode by default)
@@ -406,9 +404,7 @@ export const resendOtp = (async(req, res) => {
             createdAt: { $gt: new Date(Date.now() - cooldownSeconds * 1000) }
         });
         if (recentOtp) {
-            return res.status(429).json({
-                message: `Please wait ${cooldownSeconds} seconds before requesting another verification code`
-            });
+            throw new AppError(429, "RATE_LIMIT_EXCEEDED", `Please wait ${cooldownSeconds} seconds before requesting another verification code`);
         }
     }
 
@@ -434,4 +430,4 @@ export const resendOtp = (async(req, res) => {
     return res.status(200).json({
         message: "Verification code sent successfully"
     });
-})
+};

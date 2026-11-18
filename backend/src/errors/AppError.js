@@ -39,4 +39,7 @@ export class AppError extends Error {
     static invalidRequestBody(message = "Invalid JSON in request body") {
         return new AppError(400, "INVALID_REQUEST_BODY", message);
     }
+    static payloadTooLarge(message = "Request payload exceeds the configured limit") {
+        return new AppError(413, "PAYLOAD_TOO_LARGE", message);
+    }
 }

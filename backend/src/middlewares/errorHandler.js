@@ -40,6 +40,10 @@ export const errorHandler = (err, req, res, next) => {
         statusCode = 403;
         code = "ORIGIN_NOT_ALLOWED";
         message = "CORS origin not allowed";
+    } else if (err.code === 11000 || (err.name === "MongoServerError" && err.code === 11000)) {
+        statusCode = 409;
+        code = "RESOURCE_CONFLICT";
+        message = "Resource already exists";
         statusCode = err.statusCode;
         code = err.code;
         message = err.message;

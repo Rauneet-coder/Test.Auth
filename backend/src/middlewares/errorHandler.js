@@ -44,6 +44,18 @@ export const errorHandler = (err, req, res, next) => {
         statusCode = 409;
         code = "RESOURCE_CONFLICT";
         message = "Resource already exists";
+    } else if (err.name === "CastError") {
+        statusCode = 400;
+        code = "VALIDATION_ERROR";
+        message = `Invalid value for parameter: ${err.path}`;
+    } else if (err.name === "ValidationError" && err.errors) {
+        statusCode = 400;
+        code = "VALIDATION_ERROR";
+        message = "Request validation failed";
+        details = Object.values(err.errors).map((e) => ({
+            field: e.path,
+            message: e.message,
+        }));
         statusCode = err.statusCode;
         code = err.code;
         message = err.message;

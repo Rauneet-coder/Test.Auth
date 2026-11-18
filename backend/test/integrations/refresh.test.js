@@ -53,7 +53,14 @@ describe("POST /api/auth/refresh-token", () => {
         const response = await request(app).post("/api/auth/refresh-token");
 
         expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Unauthorized" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_REFRESH_TOKEN",
+                message: "Refresh token is required",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── Negative Test 2: Invalid or Corrupted Token ─────────────────────────
@@ -63,7 +70,14 @@ describe("POST /api/auth/refresh-token", () => {
             .set("Cookie", ["refreshToken=invalid.corrupted.jwttoken"]);
 
         expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Invalid or expired refresh token" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_REFRESH_TOKEN",
+                message: "Invalid or expired refresh token",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── Negative Test 3: Token Type Enforcement (tokenUse claim) ───────────
@@ -75,7 +89,14 @@ describe("POST /api/auth/refresh-token", () => {
             .set("Cookie", [`refreshToken=${accessToken}`]);
 
         expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Invalid or expired refresh token" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_REFRESH_TOKEN",
+                message: "Invalid or expired refresh token",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 401 if refresh token lacks required tokenUse: refresh claim", async () => {
@@ -88,7 +109,14 @@ describe("POST /api/auth/refresh-token", () => {
             .set("Cookie", [`refreshToken=${tokenWithoutUse}`]);
 
         expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Invalid or expired refresh token" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_REFRESH_TOKEN",
+                message: "Invalid or expired refresh token",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── Positive Test: Refresh Token & Rotation (Without Artificial Delays) ─
@@ -127,7 +155,14 @@ describe("POST /api/auth/refresh-token", () => {
             .set("Cookie", initialCookies);
 
         expect(reuseRes.statusCode).toBe(401);
-        expect(reuseRes.body).toEqual({ message: "Invalid or expired refresh token" });
+        expect(reuseRes.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_REFRESH_TOKEN",
+                message: "Invalid or expired refresh token",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── Positive Test 2: Using the New Rotated Token (Self-contained) ───────

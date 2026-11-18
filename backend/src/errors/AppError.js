@@ -45,4 +45,7 @@ export class AppError extends Error {
     static originNotAllowed(message = "CORS origin not allowed") {
         return new AppError(403, "ORIGIN_NOT_ALLOWED", message);
     }
+    static routeNotFound(message = "The requested resource does not exist") {
+        return new AppError(404, "ROUTE_NOT_FOUND", message);
+    }
 }

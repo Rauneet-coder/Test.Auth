@@ -9,4 +9,7 @@ export class AppError extends Error {
         this.isOperational = isOperational;
         Error.captureStackTrace(this, this.constructor);
     }
+    static validationError(details, message = "Request validation failed") {
+        return new AppError(400, "VALIDATION_ERROR", message, details);
+    }
 }

@@ -66,7 +66,14 @@ describe("POST /api/auth/register", () => {
             });
 
         expect(response.statusCode).toBe(409);
-        expect(response.body).toHaveProperty("message", "User already exists");
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "RESOURCE_CONFLICT",
+                message: "User already exists",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should reject duplicate registration with case-insensitive email matching", async () => {
@@ -81,7 +88,14 @@ describe("POST /api/auth/register", () => {
             });
 
         expect(response.statusCode).toBe(409);
-        expect(response.body).toHaveProperty("message", "User already exists");
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "RESOURCE_CONFLICT",
+                message: "User already exists",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 409 if username already exists", async () => {
@@ -97,7 +111,14 @@ describe("POST /api/auth/register", () => {
             });
 
         expect(response.statusCode).toBe(409);
-        expect(response.body).toHaveProperty("message", "User already exists");
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "RESOURCE_CONFLICT",
+                message: "User already exists",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── P0: Invalid registration data (Validation errors) ───────────────────
@@ -108,9 +129,11 @@ describe("POST /api/auth/register", () => {
                 .send({});
 
             expect(response.statusCode).toBe(400);
-            expect(response.body).toHaveProperty("errors");
-            expect(Array.isArray(response.body.errors)).toBe(true);
-            expect(response.body.errors.length).toBeGreaterThan(0);
+            expect(response.body.success).toBe(false);
+            expect(response.body.error.code).toBe("VALIDATION_ERROR");
+            expect(response.body.error.message).toBe("Request validation failed");
+            expect(Array.isArray(response.body.error.details)).toBe(true);
+            expect(response.body.error.details.length).toBeGreaterThan(0);
         });
 
         it("should return 400 validation error if email format is invalid", async () => {
@@ -123,8 +146,10 @@ describe("POST /api/auth/register", () => {
                 });
 
             expect(response.statusCode).toBe(400);
-            expect(response.body).toHaveProperty("errors");
-            const emailError = response.body.errors.find((e) => e.field === "email");
+            expect(response.body.success).toBe(false);
+            expect(response.body.error.code).toBe("VALIDATION_ERROR");
+            expect(Array.isArray(response.body.error.details)).toBe(true);
+            const emailError = response.body.error.details.find((e) => e.field === "email");
             expect(emailError).toBeDefined();
         });
 
@@ -138,8 +163,10 @@ describe("POST /api/auth/register", () => {
                 });
 
             expect(response.statusCode).toBe(400);
-            expect(response.body).toHaveProperty("errors");
-            const usernameError = response.body.errors.find((e) => e.field === "username");
+            expect(response.body.success).toBe(false);
+            expect(response.body.error.code).toBe("VALIDATION_ERROR");
+            expect(Array.isArray(response.body.error.details)).toBe(true);
+            const usernameError = response.body.error.details.find((e) => e.field === "username");
             expect(usernameError).toBeDefined();
         });
 
@@ -153,8 +180,10 @@ describe("POST /api/auth/register", () => {
                 });
 
             expect(response.statusCode).toBe(400);
-            expect(response.body).toHaveProperty("errors");
-            const passwordError = response.body.errors.find((e) => e.field === "password");
+            expect(response.body.success).toBe(false);
+            expect(response.body.error.code).toBe("VALIDATION_ERROR");
+            expect(Array.isArray(response.body.error.details)).toBe(true);
+            const passwordError = response.body.error.details.find((e) => e.field === "password");
             expect(passwordError).toBeDefined();
         });
 
@@ -168,8 +197,10 @@ describe("POST /api/auth/register", () => {
                 });
 
             expect(response.statusCode).toBe(400);
-            expect(response.body).toHaveProperty("errors");
-            const passwordError = response.body.errors.find((e) => e.field === "password");
+            expect(response.body.success).toBe(false);
+            expect(response.body.error.code).toBe("VALIDATION_ERROR");
+            expect(Array.isArray(response.body.error.details)).toBe(true);
+            const passwordError = response.body.error.details.find((e) => e.field === "password");
             expect(passwordError).toBeDefined();
             expect(passwordError.message).toContain("72 characters");
         });
@@ -220,7 +251,14 @@ describe("POST /api/auth/register", () => {
             .send(failUser);
 
         expect(response.statusCode).toBe(500);
-        expect(response.body).toHaveProperty("message", "Failed to send verification email");
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to send verification email",
+                requestId: expect.any(String)
+            }
+        });
 
         // Assert that the user was rolled back and NOT left behind
         const userInDb = await Usermodel.findOne({ email: failUser.email });

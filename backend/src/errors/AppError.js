@@ -21,4 +21,7 @@ export class AppError extends Error {
     static invalidCredentials(message = "Invalid email or password") {
         return new AppError(400, "INVALID_CREDENTIALS", message);
     }
+    static emailNotVerified(message = "Email not verified") {
+        return new AppError(400, "EMAIL_NOT_VERIFIED", message);
+    }
 }

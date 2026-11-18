@@ -7,9 +7,12 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import cors from "cors";
 import authRouter from "./routes/auth.routes.js";
+import { requestId } from "./middlewares/requestId.js";
 
 
 const app = express();
+
+app.use(requestId);
 
 app.use(helmet());
 

@@ -48,4 +48,7 @@ export class AppError extends Error {
     static routeNotFound(message = "The requested resource does not exist") {
         return new AppError(404, "ROUTE_NOT_FOUND", message);
     }
+    static invalidOtp(message = "Invalid OTP") {
+        return new AppError(400, "INVALID_OTP", message);
+    }
 }

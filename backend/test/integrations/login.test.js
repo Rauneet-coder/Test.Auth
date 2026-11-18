@@ -55,7 +55,7 @@ describe("POST /api/auth/login", () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toEqual({ message: "Invalid password" });
+        expect(response.body).toEqual({ message: "Invalid email or password" });
     });
 
     // ─── P0: Login before email verification ─────────────────────────────────
@@ -126,7 +126,7 @@ describe("POST /api/auth/login", () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toEqual({ message: "User not found" });
+        expect(response.body).toEqual({ message: "Invalid email or password" });
     });
 
 

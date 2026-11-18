@@ -69,6 +69,21 @@ describe("POST /api/auth/register", () => {
         expect(response.body).toHaveProperty("message", "User already exists");
     });
 
+    it("should reject duplicate registration with case-insensitive email matching", async () => {
+        await request(app).post("/api/auth/register").send(validUser);
+
+        const response = await request(app)
+            .post("/api/auth/register")
+            .send({
+                username: "differentusercase",
+                email: validUser.email.toUpperCase(),
+                password: "SecurePassword123!"
+            });
+
+        expect(response.statusCode).toBe(409);
+        expect(response.body).toHaveProperty("message", "User already exists");
+    });
+
     it("should return 409 if username already exists", async () => {
         // Ensure validUser exists before checking duplicate
         await request(app).post("/api/auth/register").send(validUser);
@@ -141,6 +156,22 @@ describe("POST /api/auth/register", () => {
             expect(response.body).toHaveProperty("errors");
             const passwordError = response.body.errors.find((e) => e.field === "password");
             expect(passwordError).toBeDefined();
+        });
+
+        it("should return 400 validation error if password exceeds 72 characters", async () => {
+            const response = await request(app)
+                .post("/api/auth/register")
+                .send({
+                    username: "validusername",
+                    email: "valid@example.com",
+                    password: "A1!" + "a".repeat(70) // 73 chars
+                });
+
+            expect(response.statusCode).toBe(400);
+            expect(response.body).toHaveProperty("errors");
+            const passwordError = response.body.errors.find((e) => e.field === "password");
+            expect(passwordError).toBeDefined();
+            expect(passwordError.message).toContain("72 characters");
         });
     });
 

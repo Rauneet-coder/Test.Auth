@@ -3,11 +3,29 @@
 // express application to use morgan for logging and express.json() middleware to parse incoming JSON requests.
 import express from "express";
 import morgan from "morgan";
-import authRouter from "./routes/auth.routes.js";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import cors from "cors";
+import authRouter from "./routes/auth.routes.js";
 
 
 const app = express();
+
+app.use(helmet());
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
+    : ["http://localhost:5173", "http://localhost:3000"];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true
+}));
 
 app.use(morgan("dev"));
 app.use(express.json({ limit: "10kb" }));

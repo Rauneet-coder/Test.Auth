@@ -64,7 +64,8 @@ All endpoints are mounted under `/api/auth` and protected by rate limiting.
 ### 4. User Login
 `POST /api/auth/login`
 - **Body**: `{ "email": "string", "password": "string" }`
-- **Success (200)**: Sets `refreshToken` HTTP-only cookie and returns `{ "message": "User logged in successfully", "accessToken": "<jwt>" }`.
+- **Success (200)**: Sets `refreshToken` HTTP-only cookie and returns `{ "message": "User logged in successfully", "user": { "username": "string", "email": "string" }, "accessToken": "<jwt>" }`.
+- **Features**: Prevents account enumeration by returning generic error messages on credential failure.
 
 ### 5. Get Profile
 `GET /api/auth/me`
@@ -88,9 +89,9 @@ All endpoints are mounted under `/api/auth` and protected by rate limiting.
 - **Cookie**: `refreshToken=<cookie>`
 - **Success (200)**: Revokes all active sessions for the authenticated user and clears cookie.
 
-### 9. Health Check
-`GET /api/auth/health-check`
-- **Success (200)**: `{ "message": "OK" }`
+### 9. Health Checks
+- `GET /health`: Top-level health probe returning `{ "status": "ok", "uptime": number, "timestamp": string }` for container orchestrators and CI/CD pipelines.
+- `GET /api/auth/health-check`: Auth router route probe returning `{ "message": "OK" }`.
 
 ---
 

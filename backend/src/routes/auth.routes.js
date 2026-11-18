@@ -3,7 +3,7 @@ import * as authController from "../controllers/auth.controller.js";
 import { validate } from "../middlewares/validate.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { RegisterSchema, LoginSchema, VerifyOtpSchema, ResendOtpSchema } from "../Validators/auth.validator.js";
-import { authRateLimiter } from "../middlewares/rateLimiter.js";
+import { authRateLimiter, resendOtpRateLimiter } from "../middlewares/rateLimiter.js";
 
 
 const authRouter = Router();
@@ -39,8 +39,8 @@ authRouter.post("/logout-all", authController.logoutAll);
 
 authRouter.post("/verify-email", validate(VerifyOtpSchema), authController.verifyEmail);
 
-authRouter.post("/resend-otp", validate(ResendOtpSchema), authController.resendOtp);
-authRouter.post("/resend-verification", validate(ResendOtpSchema), authController.resendOtp);
+authRouter.post("/resend-otp", resendOtpRateLimiter, validate(ResendOtpSchema), authController.resendOtp);
+authRouter.post("/resend-verification", resendOtpRateLimiter, validate(ResendOtpSchema), authController.resendOtp);
 
 authRouter.get("/health-check", authController.healthcheck);
 export default authRouter;

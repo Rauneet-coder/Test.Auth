@@ -7,7 +7,7 @@
 > **Keep this file up to date.** Every time a new package is added, a pattern
 > changes, or a design decision is made, update the relevant section here.
 >
-> Last updated: 2026-09-19 (session 2 — input validation & error handling fixes)
+> Last updated: 2026-11-18 (Phase 0 Audit & Stabilization: helmet, cors, TTL indexes, account enumeration hardening)
 
 ---
 

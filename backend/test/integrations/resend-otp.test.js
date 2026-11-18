@@ -146,5 +146,25 @@ describe("POST /api/auth/resend-otp and Database Uniqueness", () => {
             })
         ).rejects.toThrow();
     });
+
+    it("should reject rapid resend requests with 429 when cooldown is active", async () => {
+        process.env.OTP_RESEND_COOLDOWN_SECONDS = "60";
+        try {
+            // First resend succeeds
+            const first = await request(app)
+                .post("/api/auth/resend-otp")
+                .send({ email: unverifiedUser.email });
+            expect(first.statusCode).toBe(200);
+
+            // Immediate second resend is rate-limited by cooldown
+            const second = await request(app)
+                .post("/api/auth/resend-otp")
+                .send({ email: unverifiedUser.email });
+            expect(second.statusCode).toBe(429);
+            expect(second.body.message).toContain("Please wait 60 seconds");
+        } finally {
+            delete process.env.OTP_RESEND_COOLDOWN_SECONDS;
+        }
+    });
 });
 

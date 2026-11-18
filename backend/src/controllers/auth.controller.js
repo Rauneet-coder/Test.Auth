@@ -94,7 +94,7 @@ export const login = (async (req, res) => {
 
     const user = await Usermodel.findOne({email});
     if (!user) {
-        return res.status(400).json({ message: "User not found" });
+        return res.status(400).json({ message: "Invalid email or password" });
     }
 
     if(!user.verified){
@@ -103,7 +103,7 @@ export const login = (async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-        return res.status(400).json({ message: "Invalid password" });
+        return res.status(400).json({ message: "Invalid email or password" });
     }
     
     const accessToken = jwt.sign({
@@ -208,7 +208,10 @@ export const refreshToken = (async (req, res) => {
             revoked: false
         },
         {
-            $set: { refreshTokenHash: newRefreshTokenHash }
+            $set: {
+                refreshTokenHash: newRefreshTokenHash,
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            }
         },
         { returnDocument: "after" }
     );
@@ -316,7 +319,7 @@ export const logoutAll = (async (req, res) => {
     });
 });
 
-export async function verifyEmail(req, res) {
+export const verifyEmail = (async(req, res) => {
     const { otp, email } = req.body;
 
     const otpDoc = await otpModel.findOne({
@@ -383,9 +386,9 @@ export async function verifyEmail(req, res) {
             verified: user.verified
         }
     });
-}
+})
 
-export async function resendOtp(req, res) {
+export const resendOtp = (async(req, res) => {
     const { email } = req.body;
 
     const user = await Usermodel.findOne({ email });
@@ -395,6 +398,23 @@ export async function resendOtp(req, res) {
 
     if (user.verified) {
         return res.status(400).json({ message: "Email already verified" });
+    }
+
+    // Enforce 60-second cooldown between resend requests (configurable via OTP_RESEND_COOLDOWN_SECONDS, 0 in test mode by default)
+    const cooldownSeconds = process.env.OTP_RESEND_COOLDOWN_SECONDS !== undefined
+        ? Number(process.env.OTP_RESEND_COOLDOWN_SECONDS)
+        : (process.env.NODE_ENV === "test" ? 0 : 60);
+
+    if (cooldownSeconds > 0) {
+        const recentOtp = await otpModel.findOne({
+            email,
+            createdAt: { $gt: new Date(Date.now() - cooldownSeconds * 1000) }
+        });
+        if (recentOtp) {
+            return res.status(429).json({
+                message: `Please wait ${cooldownSeconds} seconds before requesting another verification code`
+            });
+        }
     }
 
     // Invalidate prior OTPs
@@ -419,4 +439,4 @@ export async function resendOtp(req, res) {
     return res.status(200).json({
         message: "Verification code sent successfully"
     });
-}
+})

@@ -4,12 +4,16 @@ import mongoose from "mongoose";
 const otpSchema = new mongoose.Schema({
     email: {
         type: String,
-        required: [ true, "Email is required" ]
+        required: [ true, "Email is required" ],
+        lowercase: true,
+        trim: true,
+        index: true
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "users",
-        required: [ true, "User is required" ]
+        ref: "Users",
+        required: [ true, "User is required" ],
+        index: true
     },
     otpHash: {
         type: String,
@@ -23,10 +27,6 @@ const otpSchema = new mongoose.Schema({
         type: Number,
         default: 5
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
     deletedAt: {
         type: Date,
         default: () => new Date(Date.now() + 300 * 1000),
@@ -34,7 +34,9 @@ const otpSchema = new mongoose.Schema({
     },
 }, {
     timestamps: true
-})
+});
+
+otpSchema.index({ email: 1, deletedAt: 1 });
 
 const otpModel = mongoose.model("otps", otpSchema)
 

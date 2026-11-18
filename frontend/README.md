@@ -1,6 +1,6 @@
-# Aith authentication playground
+# Test.Auth authentication playground
 
-A React workspace for the existing Express authentication backend. The design adapts the split-panel layout of the free [shadcn/ui authentication blocks](https://ui.shadcn.com/blocks/authentication) to Aith's forest-green identity.
+A React workspace for the existing Express authentication backend. The design adapts the split-panel layout of the free [shadcn/ui authentication blocks](https://ui.shadcn.com/blocks/authentication) to Test.Auth's forest-green identity.
 
 ## Run locally
 
@@ -26,7 +26,7 @@ Direct form routes are `/login`, `/register`, and `/verify`. Add `#activity` or 
 
 Access tokens stay in memory, and credentials are hidden in response output. After a reload, use Refresh token to rotate the browser's HttpOnly refresh cookie and automatically load the profile. The app does not make authentication requests automatically on mount. Activity is cleared on reload; only the sidebar layout preference is stored locally.
 
-Google/GitHub sign-in, password resets, and verification-code resending are unavailable because the backend has no corresponding endpoints.
+Google/GitHub sign-in and password resets are unavailable because the backend has no corresponding endpoints. Verification code resending is supported on the backend via `/api/auth/resend-otp`.
 
 ## Check changes
 

@@ -31,4 +31,6 @@ frontend/dist/
 .env.*
 *.env
 node_modules/
+.agents/
+skills-lock.json
 

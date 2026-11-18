@@ -27,3 +27,15 @@ export const authRateLimiter = createRateLimiter({
     windowMs: 15 * 60 * 1000,
     limit: process.env.NODE_ENV === "test" ? 1000 : 100,
 });
+
+/**
+ * Dedicated rate limiter for OTP resend endpoints.
+ */
+export const resendOtpRateLimiter = createRateLimiter({
+    windowMs: 15 * 60 * 1000,
+    limit: process.env.NODE_ENV === "test" ? 100 : 5,
+    message: {
+        error: "TOO_MANY_REQUESTS",
+        message: "Too many verification code requests, please try again later."
+    }
+});

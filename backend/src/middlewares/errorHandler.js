@@ -32,6 +32,10 @@ export const errorHandler = (err, req, res, next) => {
         statusCode = 400;
         code = "INVALID_REQUEST_BODY";
         message = "Invalid JSON in request body";
+    } else if (err.type === "entity.too.large" || err.status === 413) {
+        statusCode = 413;
+        code = "PAYLOAD_TOO_LARGE";
+        message = "Request payload exceeds the configured limit";
         statusCode = err.statusCode;
         code = err.code;
         message = err.message;

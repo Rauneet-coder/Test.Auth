@@ -33,4 +33,7 @@ export class AppError extends Error {
     static invalidRefreshToken(message = "Invalid or expired refresh token") {
         return new AppError(401, "INVALID_REFRESH_TOKEN", message);
     }
+    static rateLimitExceeded(message = "Too many requests, please try again later") {
+        return new AppError(429, "RATE_LIMIT_EXCEEDED", message);
+    }
 }

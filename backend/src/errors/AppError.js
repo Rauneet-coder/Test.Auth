@@ -18,4 +18,7 @@ export class AppError extends Error {
     static invalidAccessToken(message = "Invalid or expired access token") {
         return new AppError(401, "INVALID_ACCESS_TOKEN", message);
     }
+    static invalidCredentials(message = "Invalid email or password") {
+        return new AppError(400, "INVALID_CREDENTIALS", message);
+    }
 }

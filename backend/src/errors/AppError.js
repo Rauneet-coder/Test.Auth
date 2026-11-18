@@ -24,4 +24,7 @@ export class AppError extends Error {
     static emailNotVerified(message = "Email not verified") {
         return new AppError(400, "EMAIL_NOT_VERIFIED", message);
     }
+    static resourceConflict(message = "Resource already exists") {
+        return new AppError(409, "RESOURCE_CONFLICT", message);
+    }
 }

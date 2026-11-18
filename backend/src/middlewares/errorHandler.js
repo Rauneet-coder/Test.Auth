@@ -56,6 +56,10 @@ export const errorHandler = (err, req, res, next) => {
             field: e.path,
             message: e.message,
         }));
+    } else if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
+        statusCode = 401;
+        code = "INVALID_ACCESS_TOKEN";
+        message = "Invalid or expired access token";
         statusCode = err.statusCode;
         code = err.code;
         message = err.message;

@@ -36,6 +36,10 @@ export const errorHandler = (err, req, res, next) => {
         statusCode = 413;
         code = "PAYLOAD_TOO_LARGE";
         message = "Request payload exceeds the configured limit";
+    } else if (err.message === "Not allowed by CORS" || err.code === "ORIGIN_NOT_ALLOWED") {
+        statusCode = 403;
+        code = "ORIGIN_NOT_ALLOWED";
+        message = "CORS origin not allowed";
         statusCode = err.statusCode;
         code = err.code;
         message = err.message;

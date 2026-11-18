@@ -12,4 +12,7 @@ export class AppError extends Error {
     static validationError(details, message = "Request validation failed") {
         return new AppError(400, "VALIDATION_ERROR", message, details);
     }
+    static authenticationRequired(message = "Authentication token is required") {
+        return new AppError(401, "AUTHENTICATION_REQUIRED", message);
+    }
 }

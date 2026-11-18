@@ -55,7 +55,14 @@ describe("POST /api/auth/login", () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toEqual({ message: "Invalid email or password" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_CREDENTIALS",
+                message: "Invalid email or password",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── P0: Login before email verification ─────────────────────────────────
@@ -68,7 +75,14 @@ describe("POST /api/auth/login", () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toEqual({ message: "Email not verified" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "EMAIL_NOT_VERIFIED",
+                message: "Email not verified",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── P0: Login with verified user ────────────────────────────────────────
@@ -102,7 +116,15 @@ describe("POST /api/auth/login", () => {
             .send({});
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toHaveProperty("errors");
+        expect(response.body).toMatchObject({
+            success: false,
+            error: {
+                code: "VALIDATION_ERROR",
+                message: "Request validation failed",
+                details: expect.any(Array),
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 400 validation error if email format is invalid", async () => {
@@ -114,7 +136,15 @@ describe("POST /api/auth/login", () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toHaveProperty("errors");
+        expect(response.body).toMatchObject({
+            success: false,
+            error: {
+                code: "VALIDATION_ERROR",
+                message: "Request validation failed",
+                details: expect.any(Array),
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should reject login if user does not exist", async () => {
@@ -126,7 +156,14 @@ describe("POST /api/auth/login", () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toEqual({ message: "Invalid email or password" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_CREDENTIALS",
+                message: "Invalid email or password",
+                requestId: expect.any(String)
+            }
+        });
     });
 
 

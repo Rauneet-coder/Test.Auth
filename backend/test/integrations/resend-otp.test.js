@@ -64,7 +64,15 @@ describe("POST /api/auth/resend-otp and Database Uniqueness", () => {
             .send({ email: "not-an-email" });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toHaveProperty("errors");
+        expect(response.body).toMatchObject({
+            success: false,
+            error: {
+                code: "VALIDATION_ERROR",
+                message: "Request validation failed",
+                details: expect.any(Array),
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 404 if email does not belong to any user", async () => {
@@ -73,7 +81,14 @@ describe("POST /api/auth/resend-otp and Database Uniqueness", () => {
             .send({ email: "nonexistent@example.com" });
 
         expect(response.statusCode).toBe(404);
-        expect(response.body).toEqual({ message: "User not found" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "RESOURCE_NOT_FOUND",
+                message: "User not found",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 400 if user email is already verified", async () => {
@@ -82,7 +97,14 @@ describe("POST /api/auth/resend-otp and Database Uniqueness", () => {
             .send({ email: verifiedUser.email });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toEqual({ message: "Email already verified" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "RESOURCE_CONFLICT",
+                message: "Email already verified",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 200 and generate a new OTP for an unverified user", async () => {
@@ -130,13 +152,23 @@ describe("POST /api/auth/resend-otp and Database Uniqueness", () => {
             .send({ email: unverifiedUser.email });
 
         expect(response.statusCode).toBe(500);
-        expect(response.body).toEqual({ message: "Failed to send verification email" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to send verification email",
+                requestId: expect.any(String)
+            }
+        });
 
         const otpInDb = await otpModel.findOne({ email: unverifiedUser.email });
         expect(otpInDb).toBeNull();
     });
 
     it("should enforce uniqueness at the database level on duplicate email", async () => {
+        // Ensure unique indexes are built on the model
+        await Usermodel.init();
+
         // Attempting to directly insert a duplicate email into Usermodel must be rejected by unique index
         await expect(
             Usermodel.create({
@@ -161,7 +193,14 @@ describe("POST /api/auth/resend-otp and Database Uniqueness", () => {
                 .post("/api/auth/resend-otp")
                 .send({ email: unverifiedUser.email });
             expect(second.statusCode).toBe(429);
-            expect(second.body.message).toContain("Please wait 60 seconds");
+            expect(second.body).toEqual({
+                success: false,
+                error: {
+                    code: "RATE_LIMIT_EXCEEDED",
+                    message: expect.stringContaining("Please wait 60 seconds"),
+                    requestId: expect.any(String)
+                }
+            });
         } finally {
             delete process.env.OTP_RESEND_COOLDOWN_SECONDS;
         }

@@ -44,7 +44,14 @@ describe("GET /api/auth/me", () => {
         const response = await request(app).get("/api/auth/me");
 
         expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Unauthorized: no token provided" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "AUTHENTICATION_REQUIRED",
+                message: "Authentication token is required",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 401 if token is invalid or corrupted", async () => {
@@ -53,7 +60,14 @@ describe("GET /api/auth/me", () => {
             .set("Authorization", "Bearer invalid.jwt.token");
 
         expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Unauthorized: invalid or expired token" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_ACCESS_TOKEN",
+                message: "Invalid or expired access token",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 401 if a refresh token is supplied instead of an access token", async () => {
@@ -75,7 +89,14 @@ describe("GET /api/auth/me", () => {
             .set("Authorization", `Bearer ${refreshToken}`);
 
         expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Unauthorized: invalid token type" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_ACCESS_TOKEN",
+                message: "Invalid access token type",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 401 if token lacks required tokenUse: access claim", async () => {
@@ -89,7 +110,14 @@ describe("GET /api/auth/me", () => {
             .set("Authorization", `Bearer ${tokenWithoutUse}`);
 
         expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Unauthorized: invalid token type" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_ACCESS_TOKEN",
+                message: "Invalid access token type",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 200 and user profile with valid Bearer token", async () => {

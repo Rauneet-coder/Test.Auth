@@ -55,7 +55,15 @@ describe("POST /api/auth/verify-email", () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toHaveProperty("errors");
+        expect(response.body).toMatchObject({
+            success: false,
+            error: {
+                code: "VALIDATION_ERROR",
+                message: "Request validation failed",
+                details: expect.any(Array),
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── Negative Test 2: Incorrect OTP ──────────────────────────────────────
@@ -68,7 +76,14 @@ describe("POST /api/auth/verify-email", () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toEqual({ message: "Invalid OTP" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_OTP",
+                message: "Invalid OTP",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     
@@ -91,7 +106,14 @@ describe("POST /api/auth/verify-email", () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body).toEqual({ message: "Invalid OTP" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_OTP",
+                message: "Invalid OTP",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── Positive Test: Correct OTP ──────────────────────────────────────────
@@ -152,7 +174,14 @@ describe("POST /api/auth/verify-email", () => {
                     otp: "000000"
                 });
             expect(res.statusCode).toBe(400);
-            expect(res.body).toEqual({ message: "Invalid OTP" });
+            expect(res.body).toEqual({
+                success: false,
+                error: {
+                    code: "INVALID_OTP",
+                    message: "Invalid OTP",
+                    requestId: expect.any(String)
+                }
+            });
 
             const doc = await otpModel.findOne({ email: lockoutUser.email });
             expect(doc).toBeDefined();
@@ -167,7 +196,14 @@ describe("POST /api/auth/verify-email", () => {
                 otp: "000000"
             });
         expect(lockoutRes.statusCode).toBe(400);
-        expect(lockoutRes.body).toEqual({ message: "Too many failed attempts. OTP has expired." });
+        expect(lockoutRes.body).toEqual({
+            success: false,
+            error: {
+                code: "OTP_EXPIRED",
+                message: "Too many failed attempts. OTP has expired.",
+                requestId: expect.any(String)
+            }
+        });
 
         // OTP record should now be deleted / invalidated
         const expiredDoc = await otpModel.findOne({ email: lockoutUser.email });
@@ -181,6 +217,14 @@ describe("POST /api/auth/verify-email", () => {
                 otp: correctCode
             });
         expect(correctAfterLockout.statusCode).toBe(400);
+        expect(correctAfterLockout.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_OTP",
+                message: "Invalid OTP",
+                requestId: expect.any(String)
+            }
+        });
 
         // Clean up
         await Usermodel.deleteOne({ _id: user._id });

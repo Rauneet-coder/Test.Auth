@@ -53,7 +53,14 @@ describe("POST /api/auth/logout and /api/auth/logout-all", () => {
         const response = await request(app).post("/api/auth/logout");
 
         expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Already logout!" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_REFRESH_TOKEN",
+                message: "Refresh token is required",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── Positive Test: Successful Logout ────────────────────────────────────
@@ -92,15 +99,29 @@ describe("POST /api/auth/logout and /api/auth/logout-all", () => {
             .set("Cookie", cookies);
 
         expect(secondLogout.statusCode).toBe(401);
-        expect(secondLogout.body).toEqual({ message: "Invalid or expired refresh token" });
+        expect(secondLogout.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_REFRESH_TOKEN",
+                message: "Invalid or expired refresh token",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     // ─── Tests for POST /api/auth/logout-all ─────────────────────────────────
-    it("should return 400 on logout-all if refreshToken cookie is missing", async () => {
+    it("should return 401 on logout-all if refreshToken cookie is missing", async () => {
         const response = await request(app).post("/api/auth/logout-all");
 
-        expect(response.statusCode).toBe(400);
-        expect(response.body).toEqual({ message: "Refresh token not found" });
+        expect(response.statusCode).toBe(401);
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_REFRESH_TOKEN",
+                message: "Refresh token is required",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should return 401 on logout-all if refreshToken is already revoked or invalid", async () => {
@@ -115,7 +136,14 @@ describe("POST /api/auth/logout and /api/auth/logout-all", () => {
             .set("Cookie", cookies);
 
         expect(response.statusCode).toBe(401);
-        expect(response.body).toEqual({ message: "Invalid or expired refresh token" });
+        expect(response.body).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_REFRESH_TOKEN",
+                message: "Invalid or expired refresh token",
+                requestId: expect.any(String)
+            }
+        });
     });
 
     it("should revoke all active user sessions in database on logout-all", async () => {

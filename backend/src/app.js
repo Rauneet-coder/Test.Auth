@@ -48,11 +48,8 @@ app.use("/api/auth", authRouter);
 
 // ─── 404 Catch-All ──────────────────────────────────────────────────────────
 // This middleware runs only when no route above matched the request.
-app.use((_req, res) => {
-    res.status(404).json({
-        error: "NOT_FOUND",
-        message: "The requested resource does not exist"
-    });
+app.use((_req, _res, next) => {
+    next(new AppError(404, "ROUTE_NOT_FOUND", "The requested resource does not exist"));
 });
 
 // ─── Global Error Handler ────────────────────────────────────────────────────

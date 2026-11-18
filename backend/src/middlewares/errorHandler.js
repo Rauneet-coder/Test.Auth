@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { AppError } from "../errors/AppError.js";
 
 export const errorHandler = (err, req, res, next) => {
     if (res.headersSent) {
@@ -8,11 +9,25 @@ export const errorHandler = (err, req, res, next) => {
     if (!res.getHeader("X-Request-Id")) {
         res.setHeader("X-Request-Id", requestId);
     }
-    res.status(500).json({
+
+    let statusCode = 500;
+    let code = "INTERNAL_SERVER_ERROR";
+    let message = "An unexpected error occurred. Please try again later.";
+    let details = undefined;
+
+    if (err instanceof AppError) {
+        statusCode = err.statusCode;
+        code = err.code;
+        message = err.message;
+        details = err.details;
+    }
+
+    res.status(statusCode).json({
         success: false,
         error: {
-            code: "INTERNAL_SERVER_ERROR",
-            message: "An unexpected error occurred. Please try again later.",
+            code,
+            message,
+            ...(details !== undefined && details !== null ? { details } : {}),
             requestId
         }
     });

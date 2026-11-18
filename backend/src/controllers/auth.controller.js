@@ -337,9 +337,7 @@ export const verifyEmail = (async(req, res) => {
     // Check if the OTP is already locked out due to prior failed attempts
     if (otpDoc.failedAttempts >= MAX_ATTEMPTS) {
         await otpModel.deleteMany({ email });
-        return res.status(400).json({
-            message: "Too many failed attempts. OTP has expired."
-        });
+        throw new AppError(400, "OTP_EXPIRED", "Too many failed attempts. OTP has expired.");
     }
 
     const inputHash = crypto.createHash("sha256").update(String(otp)).digest("hex");

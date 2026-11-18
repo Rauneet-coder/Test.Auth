@@ -27,4 +27,7 @@ export class AppError extends Error {
     static resourceConflict(message = "Resource already exists") {
         return new AppError(409, "RESOURCE_CONFLICT", message);
     }
+    static resourceNotFound(message = "The requested resource was not found") {
+        return new AppError(404, "RESOURCE_NOT_FOUND", message);
+    }
 }

@@ -51,4 +51,7 @@ export class AppError extends Error {
     static invalidOtp(message = "Invalid OTP") {
         return new AppError(400, "INVALID_OTP", message);
     }
+    static otpExpired(message = "Too many failed attempts. OTP has expired.") {
+        return new AppError(400, "OTP_EXPIRED", message);
+    }
 }

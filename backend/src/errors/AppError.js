@@ -42,4 +42,7 @@ export class AppError extends Error {
     static payloadTooLarge(message = "Request payload exceeds the configured limit") {
         return new AppError(413, "PAYLOAD_TOO_LARGE", message);
     }
+    static originNotAllowed(message = "CORS origin not allowed") {
+        return new AppError(403, "ORIGIN_NOT_ALLOWED", message);
+    }
 }

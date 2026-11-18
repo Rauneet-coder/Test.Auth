@@ -29,11 +29,19 @@ export function describeRequestError(error, { online = true } = {}) {
   const status = error?.response?.status;
   const body = error?.response?.data;
   const isRecord = body && typeof body === "object" && !Array.isArray(body);
-  const issues = Array.isArray(body?.errors)
-    ? body.errors.filter((item) => typeof item?.message === "string").map((item) => item.message).join(" ")
+  const errObj = isRecord && body.error && typeof body.error === "object" && !Array.isArray(body.error)
+    ? body.error
+    : null;
+  const detailsList = Array.isArray(errObj?.details)
+    ? errObj.details
+    : (Array.isArray(body?.errors) ? body.errors : null);
+  const issues = Array.isArray(detailsList)
+    ? detailsList.filter((item) => typeof item?.message === "string").map((item) => item.message).join(" ")
     : "";
   let kind = "server";
-  let message = issues || (isRecord && typeof body.message === "string" ? body.message : "");
+  let message = issues ||
+    (errObj && typeof errObj.message === "string" ? errObj.message : "") ||
+    (isRecord && typeof body.message === "string" ? body.message : "");
   if (error?.code === "INVALID_RESPONSE") {
     kind = "invalid-response";
     message = error.message;

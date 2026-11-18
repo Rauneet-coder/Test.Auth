@@ -30,4 +30,7 @@ export class AppError extends Error {
     static resourceNotFound(message = "The requested resource was not found") {
         return new AppError(404, "RESOURCE_NOT_FOUND", message);
     }
+    static invalidRefreshToken(message = "Invalid or expired refresh token") {
+        return new AppError(401, "INVALID_REFRESH_TOKEN", message);
+    }
 }

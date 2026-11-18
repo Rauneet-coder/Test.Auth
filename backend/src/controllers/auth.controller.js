@@ -281,7 +281,7 @@ export const logoutAll = (async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
-        return res.status(400).json({ message: "Refresh token not found" });
+        throw new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token is required");
     }
 
     let decoded;

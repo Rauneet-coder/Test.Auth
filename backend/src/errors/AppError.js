@@ -36,4 +36,7 @@ export class AppError extends Error {
     static rateLimitExceeded(message = "Too many requests, please try again later") {
         return new AppError(429, "RATE_LIMIT_EXCEEDED", message);
     }
+    static invalidRequestBody(message = "Invalid JSON in request body") {
+        return new AppError(400, "INVALID_REQUEST_BODY", message);
+    }
 }
